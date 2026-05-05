@@ -1,28 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { Block, DaySchedule } from '@/types/timeblock'
+import type { Block, BlockTypeDef, DaySchedule } from '@/types/timeblock'
 import {
   loadSchedule,
   saveSchedule,
+  loadBlockTypes,
+  saveBlockTypes,
   computeSummary,
   todayString,
-  copySchedule,
+  generateId,
 } from '@/lib/timeblock'
 
 export function useTimeBlocking() {
   const [date, setDate] = useState(todayString)
   const [schedule, setSchedule] = useState<DaySchedule>(() => loadSchedule(todayString()))
+  const [blockTypes, setBlockTypes] = useState<BlockTypeDef[]>(() => loadBlockTypes())
 
-  // Load schedule when date changes
   useEffect(() => {
     setSchedule(loadSchedule(date))
   }, [date])
 
-  // Persist on every change
   useEffect(() => {
     saveSchedule(schedule)
   }, [schedule])
 
-  // Keyboard shortcuts
+  useEffect(() => {
+    saveBlockTypes(blockTypes)
+  }, [blockTypes])
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement).tagName
@@ -57,43 +61,27 @@ export function useTimeBlocking() {
     setSchedule(s => ({ ...s, blocks: s.blocks.filter(b => b.id !== id) }))
   }, [])
 
-  const moveBlock = useCallback((id: string, newStart: number, newEnd: number) => {
-    setSchedule(s => ({
-      ...s,
-      blocks: s.blocks.map(b =>
-        b.id === id ? { ...b, start: newStart, end: newEnd } : b
-      ),
-    }))
-  }, [])
-
-  const resizeBlock = useCallback((id: string, edge: 'top' | 'bottom', minute: number) => {
-    setSchedule(s => ({
-      ...s,
-      blocks: s.blocks.map(b => {
-        if (b.id !== id) return b
-        if (edge === 'top') {
-          const newStart = Math.max(0, Math.min(b.end - 15, minute))
-          return { ...b, start: newStart }
-        } else {
-          const newEnd = Math.min(1440, Math.max(b.start + 15, minute))
-          return { ...b, end: newEnd }
-        }
-      }),
-    }))
-  }, [])
-
-  const copyYesterday = useCallback(() => {
-    const prev = new Date(date + 'T00:00:00')
-    prev.setDate(prev.getDate() - 1)
-    const prevDate = prev.toISOString().slice(0, 10)
-    const yesterday = loadSchedule(prevDate)
-    if (yesterday.blocks.length === 0) return
-    setSchedule(copySchedule(yesterday, date))
-  }, [date])
-
   const clearDay = useCallback(() => {
-    setSchedule({ date, blocks: [] })
-  }, [date])
+    setSchedule(s => ({ ...s, blocks: [] }))
+  }, [])
+
+  const addBlockType = useCallback((name: string, color: string): BlockTypeDef => {
+    const newType: BlockTypeDef = { id: generateId(), name, color }
+    setBlockTypes(ts => [...ts, newType])
+    return newType
+  }, [])
+
+  const updateBlockType = useCallback((type: BlockTypeDef) => {
+    setBlockTypes(ts => ts.map(t => t.id === type.id ? type : t))
+    setSchedule(s => ({
+      ...s,
+      blocks: s.blocks.map(b => b.typeId === type.id ? { ...b, color: type.color } : b),
+    }))
+  }, [])
+
+  const deleteBlockType = useCallback((id: string) => {
+    setBlockTypes(ts => ts.filter(t => t.id !== id))
+  }, [])
 
   const summary = useMemo(() => computeSummary(schedule), [schedule])
 
@@ -101,13 +89,16 @@ export function useTimeBlocking() {
     date,
     schedule,
     summary,
+    blockTypes,
     setDate,
+    changeDate,
     addBlock,
     updateBlock,
     deleteBlock,
-    moveBlock,
-    resizeBlock,
-    copyYesterday,
     clearDay,
+    addBlockType,
+    updateBlockType,
+    deleteBlockType,
   }
 }
+

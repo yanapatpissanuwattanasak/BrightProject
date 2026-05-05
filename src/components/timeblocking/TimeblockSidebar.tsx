@@ -1,29 +1,33 @@
-import type { Summary } from '@/types/timeblock'
-import { BLOCK_TYPE_COLORS, BLOCK_TYPE_LABELS } from '@/types/timeblock'
+import type { BlockTypeDef, Summary } from '@/types/timeblock'
 
 type Props = {
   date: string
   summary: Summary
+  blockTypes: BlockTypeDef[]
   onDateChange: (date: string) => void
-  onCopyYesterday: () => void
   onClearDay: () => void
 }
 
-export function TimeblockSidebar({ date, summary, onDateChange, onCopyYesterday, onClearDay }: Props) {
-  const types = Object.entries(BLOCK_TYPE_LABELS) as [keyof typeof BLOCK_TYPE_LABELS, string][]
+export function TimeblockSidebar({ date, summary, blockTypes, onDateChange, onClearDay }: Props) {
+  const typeMap = new Map(blockTypes.map(t => [t.id, t]))
 
   function changeDate(delta: number) {
-    const d = new Date(date)
+    const d = new Date(date + 'T00:00:00')
     d.setDate(d.getDate() + delta)
-    onDateChange(d.toISOString().slice(0, 10))
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    onDateChange(`${y}-${m}-${day}`)
   }
 
   const displayDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
-    weekday: 'long', month: 'short', day: 'numeric',
+    weekday: 'short', month: 'short', day: 'numeric',
   })
 
+  const totalHours = Object.values(summary.totalHoursByType).reduce((a, b) => a + b, 0)
+
   return (
-    <aside className="w-56 shrink-0 flex flex-col gap-4 bg-surface-raised border-r border-surface-border p-4 h-full overflow-y-auto">
+    <aside className="w-52 shrink-0 flex flex-col gap-4 bg-surface-raised border-r border-surface-border p-4 h-full overflow-y-auto">
 
       {/* Date nav */}
       <div>
@@ -60,7 +64,7 @@ export function TimeblockSidebar({ date, summary, onDateChange, onCopyYesterday,
             {summary.utilizationRate}%
           </span>
         </div>
-        <div className="h-2 bg-surface-border rounded-full overflow-hidden">
+        <div className="h-1.5 bg-surface-border rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{
@@ -71,53 +75,42 @@ export function TimeblockSidebar({ date, summary, onDateChange, onCopyYesterday,
         </div>
       </div>
 
-      {/* Free time */}
+      {/* Stats row */}
       <div className="flex justify-between items-center">
-        <span className="text-xs text-text-muted">Free time</span>
-        <span className="text-sm font-mono text-text-secondary">{summary.freeTime.toFixed(1)}h</span>
+        <span className="text-xs text-text-muted">Planned</span>
+        <span className="text-xs font-mono text-text-secondary">{totalHours.toFixed(1)}h</span>
+      </div>
+      <div className="flex justify-between items-center -mt-3">
+        <span className="text-xs text-text-muted">Free</span>
+        <span className="text-xs font-mono text-text-secondary">{summary.freeTime.toFixed(1)}h</span>
       </div>
 
       {/* Per-type breakdown */}
       <div>
         <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Breakdown</p>
-        <div className="flex flex-col gap-2">
-          {types.map(([type, label]) => {
-            const hours = summary.totalHoursByType[type] ?? 0
+        <div className="flex flex-col gap-1.5">
+          {Object.entries(summary.totalHoursByType).map(([typeId, hours]) => {
             if (hours === 0) return null
+            const type = typeMap.get(typeId)
+            if (!type) return null
             return (
-              <div key={type} className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: BLOCK_TYPE_COLORS[type] }} />
-                <span className="text-xs text-text-secondary flex-1">{label}</span>
+              <div key={typeId} className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: type.color }} />
+                <span className="text-xs text-text-secondary flex-1 truncate">{type.name}</span>
                 <span className="text-xs font-mono text-text-primary">{hours.toFixed(1)}h</span>
               </div>
             )
           })}
+          {Object.values(summary.totalHoursByType).every(h => h === 0) && (
+            <p className="text-[11px] text-text-muted italic">No blocks yet</p>
+          )}
         </div>
       </div>
 
-      {/* Balance score */}
-      {(summary.totalHoursByType.work > 0 || summary.totalHoursByType.life > 0) && (
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-text-muted">Work/Life</span>
-          <span className="text-xs font-mono text-text-secondary">
-            {summary.totalHoursByType.work > 0 && summary.totalHoursByType.life > 0
-              ? `${(summary.totalHoursByType.work / summary.totalHoursByType.life).toFixed(1)}×`
-              : '—'
-            }
-          </span>
-        </div>
-      )}
-
-      <div className="mt-auto flex flex-col gap-2">
-        <button
-          onClick={onCopyYesterday}
-          className="text-xs text-text-muted hover:text-text-primary border border-surface-border rounded-lg py-1.5 transition-colors hover:border-primary"
-        >
-          Copy yesterday
-        </button>
+      <div className="mt-auto pt-4 border-t border-surface-border">
         <button
           onClick={onClearDay}
-          className="text-xs text-error/60 hover:text-error border border-surface-border rounded-lg py-1.5 transition-colors hover:border-error"
+          className="w-full text-xs text-text-muted hover:text-red-400 transition-colors text-left"
         >
           Clear day
         </button>
@@ -125,3 +118,4 @@ export function TimeblockSidebar({ date, summary, onDateChange, onCopyYesterday,
     </aside>
   )
 }
+
