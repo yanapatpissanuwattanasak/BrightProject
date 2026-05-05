@@ -1,12 +1,19 @@
 import { useRef } from 'react'
 import type { Block, DaySchedule } from '@/types/timeblock'
 import {
-  getTimeLabels,
-  minutesToPx,
-  pxToMinutes,
   snapToInterval,
-  MINUTES_IN_DAY,
 } from '@/lib/timeblock'
+
+const MINUTES_IN_DAY = 1440
+const PX_PER_MINUTE = 1.5
+function minutesToPx(m: number) { return m * PX_PER_MINUTE }
+function pxToMinutes(px: number) { return px / PX_PER_MINUTE }
+function getTimeLabels() {
+  return Array.from({ length: 24 }, (_, h) => ({
+    minutes: h * 60,
+    label: `${String(h).padStart(2, '0')}:00`,
+  }))
+}
 import { TimelineBlock } from './TimelineBlock'
 
 type Props = {

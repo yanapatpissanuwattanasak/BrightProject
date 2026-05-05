@@ -10,8 +10,6 @@ type Props = {
 export function Dashboard({ date, blockTypes }: Props) {
   const [view, setView] = useState<'day' | 'month'>('day')
 
-  const typeMap = new Map(blockTypes.map(t => [t.id, t]))
-
   const [year, monthNum] = date.split('-').map(Number)
 
   const dayData = useMemo(() => {

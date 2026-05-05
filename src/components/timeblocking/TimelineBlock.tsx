@@ -1,6 +1,14 @@
 import { useRef, useState } from 'react'
 import type { Block } from '@/types/timeblock'
-import { minutesToPx, minutesToTime, minutesToDuration } from '@/lib/timeblock'
+import { minutesToTime } from '@/lib/timeblock'
+
+const PX_PER_MINUTE = 1.5
+function minutesToPx(m: number) { return m * PX_PER_MINUTE }
+function minutesToDuration(minutes: number) {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}
 
 type Props = {
   block: Block
