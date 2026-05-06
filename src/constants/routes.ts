@@ -6,6 +6,7 @@ export const ROUTES = {
   CONTACT: '/contact',
   TIME_BLOCKING: '/time-blocking',
   TAROT: '/tarot',
+  THAILAND: '/thailand',
   ADMIN: {
     LOGIN: '/admin/login',
     DASHBOARD: '/admin',

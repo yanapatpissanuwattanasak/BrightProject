@@ -6,9 +6,10 @@ interface ProjectsGridProps {
   projects?: Project[]
   isLoading?: boolean
   title?: string
+  appendCards?: React.ReactNode
 }
 
-export function ProjectsGrid({ projects, isLoading, title = 'More Projects' }: ProjectsGridProps) {
+export function ProjectsGrid({ projects, isLoading, title = 'More Projects', appendCards }: ProjectsGridProps) {
   return (
     <section className="mx-auto max-w-6xl px-6 py-section">
       <ScrollReveal>
@@ -23,6 +24,7 @@ export function ProjectsGrid({ projects, isLoading, title = 'More Projects' }: P
                 <ProjectCard project={project} />
               </ScrollReveal>
             ))}
+        {!isLoading && appendCards}
       </div>
     </section>
   )

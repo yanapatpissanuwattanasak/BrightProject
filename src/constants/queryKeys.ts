@@ -1,6 +1,11 @@
 import type { ProjectFilters } from '@/types/project.types'
+import type { AttractionFilter } from '@/types/thailand.types'
 
 export const queryKeys = {
+  attractions: {
+    byProvince: (provinceId: string, filter: AttractionFilter) =>
+      ['attractions', provinceId, filter] as const,
+  },
   projects: {
     all: ['projects'] as const,
     published: (filters?: ProjectFilters) => ['projects', 'published', filters] as const,

@@ -12,34 +12,6 @@ export const STATIC_TAGS: Tag[] = [
 
 export const STATIC_PROJECTS: Project[] = [
   {
-    id: '2',
-    title: 'Bright Portfolio — This Website',
-    slug: 'bright-portfolio',
-    summary:
-      'A CMS-backed portfolio built with React SPA + NestJS + PostgreSQL + Clean Architecture. The backend is the portfolio piece — demonstrating the same architectural patterns used in production.',
-    problem:
-      'Most developer portfolios are static sites that claim backend skill without demonstrating it. The portfolio itself becomes an implicit proof artifact when it runs a real backend.',
-    solution:
-      'Built a decoupled React SPA backed by a NestJS API with Clean Architecture layers. Projects are CMS-managed without code deployments. The architecture ADRs document every tradeoff explicitly.',
-    techStack: ['React', 'NestJS', 'PostgreSQL', 'TypeScript', 'Tailwind CSS', 'TanStack Query'],
-    metrics: [
-      { label: 'Lighthouse performance', value: '95+' },
-      { label: 'Admin panel bundle', value: '0 KB (public)' },
-      { label: 'ADR documents', value: '9' },
-    ],
-    loomUrl: undefined,
-    demoUrl: 'https://bright.dev',
-    githubUrl: 'https://github.com/ynpbright/bright-portfolio',
-    thumbnailUrl: undefined,
-    sortOrder: 2,
-    isFeatured: false,
-    status: 'published',
-    publishedAt: '2026-05-05T00:00:00Z',
-    createdAt: '2026-05-05T00:00:00Z',
-    updatedAt: '2026-05-05T00:00:00Z',
-    tags: [STATIC_TAGS[0], STATIC_TAGS[1], STATIC_TAGS[2], STATIC_TAGS[3]],
-  },
-  {
     id: '3',
     title: 'Time Blocking — Visual Day Planner',
     slug: 'time-blocking',

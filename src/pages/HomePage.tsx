@@ -3,6 +3,8 @@ import { HeroSection } from '@/components/home/HeroSection'
 import { FeaturedProjectCard } from '@/components/home/FeaturedProjectCard'
 import { ProjectsGrid } from '@/components/home/ProjectsGrid'
 import { SkillsSection } from '@/components/home/SkillsSection'
+import { WelcomeOverlay } from '@/components/home/WelcomeOverlay'
+import { ThailandCard } from '@/components/home/ThailandCard'
 import { useFeaturedProjects } from '@/hooks/useFeaturedProjects'
 import { usePublishedProjects } from '@/hooks/usePublishedProjects'
 
@@ -15,6 +17,7 @@ export default function HomePage() {
 
   return (
     <>
+      <WelcomeOverlay />
       <Helmet>
         <title>Bright — Full-Stack Software Engineer | React + NestJS + PostgreSQL</title>
         <meta
@@ -31,7 +34,7 @@ export default function HomePage() {
         </section>
       )}
 
-      <ProjectsGrid projects={otherProjects} isLoading={isLoading} />
+      <ProjectsGrid projects={otherProjects} isLoading={isLoading} appendCards={<ThailandCard />} />
 
       <SkillsSection />
     </>
