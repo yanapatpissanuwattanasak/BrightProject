@@ -11,6 +11,7 @@ const navItems = [
   { label: 'About', to: ROUTES.ABOUT },
   { label: 'Contact', to: ROUTES.CONTACT },
   { label: 'Time Blocking', to: ROUTES.TIME_BLOCKING },
+  { label: 'Tarot', to: ROUTES.TAROT },
 ]
 
 export function Navigation() {

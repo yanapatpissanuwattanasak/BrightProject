@@ -12,6 +12,7 @@ import AboutPage from '@/pages/AboutPage'
 import ContactPage from '@/pages/ContactPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { TimeBlockingPage } from '@/pages/TimeBlockingPage'
+import { TarotPage } from '@/pages/TarotPage'
 
 // Admin pages — lazy-loaded, separate chunk
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
@@ -40,6 +41,9 @@ export default function App() {
 
         {/* Time Blocking — standalone (no nav layout) */}
         <Route path="/time-blocking" element={<TimeBlockingPage />} />
+
+        {/* Tarot — standalone (no nav layout) */}
+        <Route path="/tarot" element={<TarotPage />} />
 
         {/* Admin login (no layout) */}
         <Route

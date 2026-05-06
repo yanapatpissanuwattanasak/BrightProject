@@ -9,6 +9,10 @@ interface ProjectCardProps {
   project: Project
 }
 
+function isInternalUrl(url: string) {
+  return url.startsWith('/')
+}
+
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <article className="group rounded-card bg-surface-raised border border-surface-border overflow-hidden hover:border-primary/40 transition-colors">
@@ -20,8 +24,15 @@ export function ProjectCard({ project }: ProjectCardProps) {
           loading="lazy"
         />
       ) : (
-        <div className="w-full aspect-video bg-surface flex items-center justify-center">
-          <span className="font-mono text-xs text-text-muted">{project.slug}</span>
+        <div
+          className="w-full aspect-video flex items-center justify-center"
+          style={{
+            background: project.tags[0]
+              ? `linear-gradient(135deg, ${project.tags[0].color}18 0%, ${project.tags[project.tags.length - 1]?.color ?? project.tags[0].color}28 100%)`
+              : 'var(--color-surface)',
+          }}
+        >
+          <span className="font-mono text-xs text-text-muted opacity-50">{project.slug}</span>
         </div>
       )}
 
@@ -45,14 +56,23 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
         <div className="flex gap-3 text-sm">
           {project.demoUrl && (
-            <a
-              href={project.demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:text-primary-hover font-medium transition-colors"
-            >
-              Live Demo ↗
-            </a>
+            isInternalUrl(project.demoUrl) ? (
+              <Link
+                to={project.demoUrl}
+                className="text-primary hover:text-primary-hover font-medium transition-colors"
+              >
+                Try it →
+              </Link>
+            ) : (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:text-primary-hover font-medium transition-colors"
+              >
+                Live Demo ↗
+              </a>
+            )
           )}
           {project.githubUrl && (
             <a

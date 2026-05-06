@@ -8,10 +8,10 @@ import { usePublishedProjects } from '@/hooks/usePublishedProjects'
 
 export default function HomePage() {
   const { data: featured } = useFeaturedProjects()
-  const { data: projects, isLoading } = usePublishedProjects({ limit: 6 })
+  const { data: projects, isLoading } = usePublishedProjects()
 
   const featuredProject = featured?.[0]
-  const otherProjects = projects?.filter((p) => !p.isFeatured)
+  const otherProjects = projects?.filter((p) => !p.isFeatured).slice(0, 6)
 
   return (
     <>

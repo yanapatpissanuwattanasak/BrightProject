@@ -5,6 +5,7 @@ export const ROUTES = {
   ABOUT: '/about',
   CONTACT: '/contact',
   TIME_BLOCKING: '/time-blocking',
+  TAROT: '/tarot',
   ADMIN: {
     LOGIN: '/admin/login',
     DASHBOARD: '/admin',
