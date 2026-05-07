@@ -1,56 +1,38 @@
 import type { Attraction, AttractionCategory, Province } from '@/types/thailand.types'
 
-const BASE = 'https://api.foursquare.com/v3'
+const BASE = '/tat-api'
 
 function headers(): HeadersInit {
-  return { Authorization: import.meta.env.VITE_FOURSQUARE_API_KEY }
-}
-
-// Foursquare category IDs mapped to our AttractionCategory
-const FSQ_CATEGORIES: Record<AttractionCategory, string> = {
-  nature: '16032,16034,16020',     // Nature Reserve, Park, Garden
-  temple: '12104',                  // Temple
-  beach: '16019',                   // Beach
-  museum: '10028,10026',            // Museum, Art Museum
-  market: '17066,17114',            // Flea Market, Market
-  waterfall: '16042',               // Waterfall
-  viewpoint: '16046',               // Scenic Lookout
-  historical: '10027,10017',        // Historic Site, Architecture
-}
-
-// FSQ categories → our AttractionCategory (first-match wins)
-const FSQ_TO_CAT: [string, AttractionCategory][] = [
-  ['12104', 'temple'],
-  ['16019', 'beach'],
-  ['16042', 'waterfall'],
-  ['16046', 'viewpoint'],
-  ['10028', 'museum'], ['10026', 'museum'],
-  ['17066', 'market'], ['17114', 'market'],
-  ['10027', 'historical'], ['10017', 'historical'],
-]
-
-function detectCategory(
-  categories: { id: number }[],
-  fallback?: AttractionCategory,
-): AttractionCategory {
-  for (const [id, cat] of FSQ_TO_CAT) {
-    if (categories.some((c) => String(c.id) === id)) return cat
+  return {
+    'x-api-key': import.meta.env.VITE_TAT_API_KEY,
+    'Accept-Language': 'en',
   }
-  return fallback ?? 'nature'
 }
 
-interface FsqPlace {
-  fsq_id: string
-  name: string
-  categories: { id: number; name: string }[]
-  rating?: number
-  description?: string
-  geocodes?: { main: { latitude: number; longitude: number } }
-  photos?: { prefix: string; suffix: string }[]
+// TAT API uses keyword search for sub-category filtering
+const CATEGORY_KEYWORDS: Partial<Record<AttractionCategory, string>> = {
+  temple: 'temple',
+  beach: 'beach',
+  museum: 'museum',
+  market: 'market',
+  waterfall: 'waterfall',
+  viewpoint: 'viewpoint',
+  historical: 'historical',
 }
 
-interface FsqSearchResponse {
-  results: FsqPlace[]
+interface TatPlace {
+  placeId: string
+  name: string | null
+  introduction: string | null
+  category: { categoryId: number; name: string }
+  latitude: string | null
+  longitude: string | null
+  thumbnailUrl: string[]
+  viewer: number
+}
+
+interface TatPlaceResponse {
+  data: TatPlace[]
 }
 
 export async function fetchAttractionsByProvince(
@@ -58,34 +40,35 @@ export async function fetchAttractionsByProvince(
   category?: AttractionCategory,
 ): Promise<Attraction[]> {
   const params = new URLSearchParams({
-    near: `${province.tatName}, Thailand`,
+    province_id: String(province.tatId),
+    place_category_id: '3', // 3 = Attraction
     limit: '10',
-    fields: 'fsq_id,name,categories,rating,description,geocodes,photos',
+    has_name: 'true',
+    has_thumbnail: 'true',
   })
-  if (category) params.set('categories', FSQ_CATEGORIES[category])
 
-  const res = await fetch(`${BASE}/places/search?${params}`, { headers: headers() })
-  if (!res.ok) throw new Error(`Foursquare search failed: ${res.status}`)
+  const keyword = category ? CATEGORY_KEYWORDS[category] : undefined
+  if (keyword) params.set('keyword', keyword)
 
-  const data: FsqSearchResponse = await res.json()
+  const res = await fetch(`${BASE}/places?${params}`, { headers: headers() })
+  if (!res.ok) throw new Error(`TAT API failed: ${res.status}`)
 
-  return (data.results ?? []).map((place): Attraction => {
-    const photo = place.photos?.[0]
-    const imageUrl = photo ? `${photo.prefix}300x300${photo.suffix}` : ''
-    const rating = place.rating ? place.rating / 2 : 4.0  // FSQ rating is 0-10 → 0-5
+  const data: TatPlaceResponse = await res.json()
 
-    return {
-      id: place.fsq_id,
-      name: place.name,
+  return (data.data ?? [])
+    .filter((p) => p.name)
+    .sort((a, b) => (b.viewer ?? 0) - (a.viewer ?? 0))
+    .map((place): Attraction => ({
+      id: place.placeId,
+      name: place.name!,
       provinceId: province.id,
-      category: detectCategory(place.categories, category),
-      rating: Math.min(5, Math.max(1, parseFloat(rating.toFixed(1)))),
-      description: (place.description ?? '').slice(0, 200),
-      imageUrl,
+      category: category ?? 'nature',
+      rating: 4.0,
+      description: place.introduction ?? '',
+      imageUrl: place.thumbnailUrl[0] ?? '',
       coordinates: {
-        lat: place.geocodes?.main.latitude ?? 0,
-        lon: place.geocodes?.main.longitude ?? 0,
+        lat: parseFloat(place.latitude ?? '0'),
+        lon: parseFloat(place.longitude ?? '0'),
       },
-    }
-  }).sort((a, b) => b.rating - a.rating)
+    }))
 }

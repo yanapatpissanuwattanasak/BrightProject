@@ -5,6 +5,15 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  server: {
+    proxy: {
+      '/tat-api': {
+        target: 'https://tatdataapi.io/api/v2',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tat-api/, ''),
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

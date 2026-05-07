@@ -2,9 +2,7 @@
 
 ## Overview
 
-Display an interactive SVG map of Thailand's 77 provinces. Clicking a province on the map reveals its top-rated tourist attractions in a side panel, sorted by rating. Attraction data is fetched live from the **Foursquare Places API v3** (free tier, 1 000 req/day, no credit card). Static data in `src/data/thailand.ts` is always the fallback when no API key is set or when the API call fails.
-
-> **Note:** TAT API (`tatapi.tourismthailand.org`) was evaluated but found to be unreachable (domain returns 404 for all endpoints). Replaced by Foursquare.
+Display an interactive SVG map of Thailand's 77 provinces. Clicking a province on the map reveals its top-rated tourist attractions in a side panel, sorted by popularity (viewer count). Attraction data is fetched live from the **TAT Data API v2** (Tourism Authority of Thailand). Static data in `src/data/thailand.ts` is the fallback when no API key is set or when the API call fails.
 
 ---
 
@@ -14,101 +12,94 @@ Display an interactive SVG map of Thailand's 77 provinces. Clicking a province o
 |----|-------|-----------|----------|
 | US-01 | Visitor | Click a province on the Thailand map | I can select a region visually without typing |
 | US-02 | Visitor | See the selected province highlighted on the map | I know which province is active |
-| US-03 | Visitor | See tourist attractions sorted by rating (highest first) | I discover the most recommended places immediately |
+| US-03 | Visitor | See tourist attractions sorted by popularity (highest first) | I discover the most visited places immediately |
 | US-04 | Visitor | Filter attractions by category (nature, temple, beach, etc.) | I find places matching my travel interest |
-| US-05 | Visitor | See each attraction's rating, category, and a brief description | I can evaluate whether to visit |
+| US-05 | Visitor | See each attraction's category and a brief description | I can evaluate whether to visit |
 | US-06 | Visitor | See a prompt when no province is selected | I understand I need to click the map to begin |
 | US-07 | Visitor | See an empty state when no attractions match the filter | I understand there is no data, not a broken UI |
 
 ---
 
-## API: Foursquare Places API v3
+## API: TAT Data API v2
 
-**Base URL:** `https://api.foursquare.com/v3`  
-**Auth:** `Authorization: fsq3{API_KEY}` request header (no "Bearer" prefix)  
-**Free tier:** 1 000 API calls/day · no credit card required  
-**Docs:** https://docs.foursquare.com/developer/reference/place-search
+**Base URL:** `https://tatdataapi.io/api/v2` (accessed via `/tat-api` proxy to avoid CORS)  
+**Auth:** `x-api-key: {API_KEY}` request header  
+**Docs:** https://tatdataapi.io/api/docs-json  
+**CORS:** TAT API does not allow browser requests directly — all calls go through a proxy:
+- **Dev:** Vite proxy (`/tat-api` → `https://tatdataapi.io/api/v2`) configured in `vite.config.ts`
+- **Production:** Nginx `proxy_pass` configured in `nginx.conf`
 
-### How to Get a Free API Key
+### How to Get an API Key
 
-1. Go to **https://foursquare.com/developers** and click **Sign Up**
-2. Create an account (email or Google/GitHub login)
-3. From the dashboard, click **Create a new project**
-4. Give the project any name (e.g., "thailand-map")
-5. Under **API Keys**, copy the key that starts with `fsq3…`
-6. Paste it into your `.env` file:
+1. Register at **https://tatdataapi.io**
+2. Obtain your API key from the developer console
+3. Paste it into your `.env` file:
    ```bash
-   VITE_FOURSQUARE_API_KEY=fsq3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   VITE_TAT_API_KEY=your_key_here
    ```
-7. Restart the dev server — the app switches from static data to live Foursquare data automatically
-
-> The free Personal plan gives 1 000 place searches per day. No payment info needed.
+4. Restart the dev server — the app switches from static data to live TAT data automatically
 
 ### Environment Variable
 
 ```bash
 # .env
-VITE_FOURSQUARE_API_KEY=fsq3your_key_here
+VITE_TAT_API_KEY=your_key_here
 ```
 
-`.env.example` contains `VITE_FOURSQUARE_API_KEY=` (blank value as placeholder).
+`.env.example` contains `VITE_TAT_API_KEY=` (blank value as placeholder).
 
 ### Endpoint Used
 
 ```
-GET /places/search
-  ?near={province.tatName}, Thailand   # e.g. "Chiang Mai, Thailand"
-  &categories={fsqCategoryIds}          # comma-separated IDs (see table below)
+GET /places
+  ?province_id={province.tatId}    # TAT numeric province ID (stored in Province.tatId)
+  &place_category_id=3             # 3 = Attraction only
   &limit=10
-  &fields=fsq_id,name,categories,rating,description,geocodes,photos
-Authorization: fsq3{VITE_FOURSQUARE_API_KEY}
+  &has_name=true
+  &has_thumbnail=true
+  &keyword={categoryKeyword}       # optional — see table below
+Accept-Language: en
+x-api-key: {VITE_TAT_API_KEY}
 ```
 
 Response shape:
 ```json
 {
-  "results": [
+  "data": [
     {
-      "fsq_id": "4b058804f964a520b2a822e3",
+      "placeId": "6235",
       "name": "Doi Inthanon National Park",
-      "categories": [{ "id": 16032, "name": "Nature Reserve" }],
-      "rating": 9.2,
-      "description": "Highest peak in Thailand...",
-      "geocodes": { "main": { "latitude": 18.5883, "longitude": 98.4867 } },
-      "photos": [{ "prefix": "https://fastly.4sqi.net/img/general/", "suffix": "/photo.jpg" }]
+      "introduction": "Highest peak in Thailand...",
+      "category": { "categoryId": 3, "name": "Attraction" },
+      "latitude": "18.5883",
+      "longitude": "98.4867",
+      "thumbnailUrl": ["https://dmc.tatdataapi.io/assets/photo.jpg"],
+      "viewer": 510
     }
-  ]
+  ],
+  "pagination": { "pageNumber": 1, "pageSize": 10, "total": 543 }
 }
 ```
 
-> `rating` is on a **0–10 scale** in Foursquare. Divide by 2 to convert to 0–5 stars.  
-> `description` and `photos` are available on the free Personal plan.  
-> `rating` may be absent for venues with few check-ins — default to `4.0` when missing.
+> `rating` is not provided by TAT API — defaults to `4.0` for all attractions.  
+> `viewer` (view count) is used for sorting: higher viewer count = shown first.  
+> `introduction` may be `null` — displayed as empty string.
 
-### Foursquare Category ID Mapping
+### Category Keyword Mapping
 
-| `AttractionCategory` | Foursquare `categories` IDs | Label |
-|----------------------|----------------------------|-------|
-| `nature` | `16032,16034,16020` | Nature Reserve, Park, Garden |
-| `temple` | `12104` | Temple |
-| `beach` | `16019` | Beach |
-| `museum` | `10028,10026` | Museum, Art Museum |
-| `market` | `17066,17114` | Flea Market, Market |
-| `waterfall` | `16042` | Waterfall |
-| `viewpoint` | `16046` | Scenic Lookout |
-| `historical` | `10027,10017` | Historic Site, Architecture |
-| `all` | _(omit `categories` param)_ | All types |
+TAT API has no attraction sub-categories. Category filtering uses the `keyword` param:
 
-### Rating Conversion
-
-| Foursquare `rating` | Display stars |
-|---------------------|--------------|
-| 9.0 – 10.0 | ★★★★★ 4.5 – 5.0 |
-| 7.0 – 8.9 | ★★★★ 3.5 – 4.4 |
-| 5.0 – 6.9 | ★★★ 2.5 – 3.4 |
-| < 5.0 or missing | ★★★★ 4.0 (default) |
-
-Formula: `displayRating = fsqRating / 2`, clamped to `[1.0, 5.0]`.
+| `AttractionCategory` | `keyword` param | Label |
+|----------------------|----------------|-------|
+| `nature` | _(omit keyword)_ | All attractions |
+| `temple` | `temple` | Temple / Shrine |
+| `beach` | `beach` | Beach |
+| `museum` | `museum` | Museum |
+| `market` | `market` | Market |
+| `waterfall` | `waterfall` | Waterfall |
+| `viewpoint` | `viewpoint` | Viewpoint |
+| `historical` | `historical` | Historical Site |
+| `all` | _(omit keyword)_ | All types |
 
 ---
 
@@ -121,24 +112,25 @@ interface Province {
   id: string       // slugified TopoJSON NAME_1, e.g. "chiang-mai"
   name: string     // English (matches TopoJSON NAME_1 exactly)
   nameTh: string   // Thai name: "เชียงใหม่"
-  tatName: string  // English name passed to Foursquare `near` param
+  tatName: string  // English display name
+  tatId: number    // TAT Data API numeric province ID (used in API calls)
   region: Region
 }
 
 type Region = "north" | "south" | "east" | "west" | "central" | "northeast"
 ```
 
-### Attraction (derived from Foursquare response or static data)
+### Attraction (derived from TAT API response or static data)
 
 ```ts
 interface Attraction {
-  id: string            // Foursquare fsq_id (or static string for fallback data)
+  id: string            // TAT placeId (or static string for fallback data)
   name: string
   provinceId: string    // matched from selectedProvince.id
   category: AttractionCategory
-  rating: number        // 1.0 – 5.0 (converted from Foursquare 0–10)
-  description: string   // truncated to 200 chars; empty string if unavailable
-  imageUrl: string      // Foursquare photo URL; empty string if unavailable
+  rating: number        // always 4.0 (TAT API does not provide ratings)
+  description: string   // from TAT `introduction`; empty string if null
+  imageUrl: string      // first item of TAT `thumbnailUrl[]`; empty string if none
   coordinates: { lat: number; lon: number }
 }
 
@@ -152,13 +144,13 @@ type AttractionCategory =
 ## Static Data (Fallback)
 
 - **File:** `src/data/thailand.ts`
-- `PROVINCES: Province[]` — 76 provinces with Thai names and bounding region
+- `PROVINCES: Province[]` — 77 provinces with Thai names, TAT IDs, and bounding region
 - `STATIC_ATTRACTIONS: Attraction[]` — 3 attractions per province for 10 key provinces
-- Activated automatically when `VITE_FOURSQUARE_API_KEY` is unset:
+- Activated automatically when `VITE_TAT_API_KEY` is unset:
   ```ts
-  const USE_STATIC = !import.meta.env.VITE_FOURSQUARE_API_KEY
+  const USE_STATIC = !import.meta.env.VITE_TAT_API_KEY
   ```
-- Also used as silent fallback when the API call throws (network error, CORS, rate limit)
+- Also used as silent fallback when the API call throws (network error, rate limit)
 - Key provinces covered: Bangkok, Chiang Mai, Phuket, Krabi, Chiang Rai, Ayutthaya, Kanchanaburi, Nakhon Ratchasima, Phetchabun, Surat Thani
 
 ---
@@ -177,17 +169,18 @@ function useAttractionsByProvince(
 
 **When `province` is null:** query disabled (`enabled: false`)
 
-**Live (Foursquare) flow:**
-1. `GET /places/search?near={province.tatName}, Thailand&categories={ids}&limit=10&fields=…`
-2. Map response `results[]` → `Attraction[]` (divide rating by 2, build photo URL)
-3. Sort by `rating` desc
-4. On any error → silently return static data for the same province + filter
+**Live (TAT) flow:**
+1. `GET /tat-api/places?province_id={province.tatId}&place_category_id=3&limit=10&has_name=true&has_thumbnail=true[&keyword={category}]`
+2. Filter out places with null names
+3. Sort by `viewer` desc (most viewed first)
+4. Map response `data[]` → `Attraction[]` (rating defaults to 4.0)
+5. On any error → silently return static data for the same province + filter
 
 **Static flow:** filter `STATIC_ATTRACTIONS` by `provinceId` → filter by `category` → sort by `rating` desc
 
 **Query key:** `["attractions", province.id, filter]` — registered in `src/constants/queryKeys.ts`
 
-**Retry:** `retry: false` — fail fast then fall back to static; don't hammer the API
+**Retry:** `retry: false` — fail fast then fall back to static
 
 ---
 
@@ -197,19 +190,22 @@ function useAttractionsByProvince(
 
 - **Path:** `src/components/thailand/ThailandMap.tsx`
 - SVG map via `react-simple-maps` + `<Geographies>` from `public/data/thailand-provinces.json`
-- 76 province `<Geography>` paths (lake boundary geometries filtered out)
-- **States per path:**
-  - Default: `fill: surface-raised`, `stroke: surface-border`
-  - Hover: lighter fill, `stroke: primary`, CSS `transition` only
-  - Selected: `fill: primary`
-- **Tooltip:** province `name` + `nameTh` on hover (CSS-positioned div, pointer-events-none)
-- **Props:**
-  ```ts
-  interface ThailandMapProps {
-    selectedProvinceId: string | null
-    onProvinceClick: (province: Province) => void
-  }
-  ```
+- 77 province `<Geography>` paths (lake boundary geometries filtered out)
+- Province fill color is **region-based** (muted dark tones):
+
+| Region | Default fill | Hover fill |
+|--------|-------------|------------|
+| north | `#243D6B` | `#2E4F85` |
+| northeast | `#3D2580` | `#4D2F9A` |
+| central | `#245340` | `#2E6B52` |
+| south | `#533B24` | `#6B4D2E` |
+| east | `#245454` | `#2E6B6B` |
+| west | `#54402A` | `#6B5235` |
+
+- **Map background:** `#0E1020` (dark navy, ocean-like)
+- **Selected province:** `fill: #6366F1` (primary)
+- **Stroke:** `#2D2D3E` default, `#6366F1` on hover/selected
+- **Tooltip:** province `name` + `nameTh` on hover
 - `useReducedMotion()` disables hover transition (ADR-003)
 
 ### `AttractionCard`
@@ -217,13 +213,12 @@ function useAttractionsByProvince(
 - **Path:** `src/components/thailand/AttractionCard.tsx`
 - Displays: image (emoji fallback by category if no URL), name, category badge, `StarRating`, description
 - Hover: CSS `transition` only — `border-color` to `primary/40`
-- `isLoading` prop renders skeleton layout
 
 ### `StarRating`
 
 - **Path:** `src/components/thailand/StarRating.tsx`
 - Props: `rating: number` (1.0–5.0)
-- Full / half / empty SVG stars + numeric value (e.g. `4.6`)
+- Full / half / empty SVG stars + numeric value
 
 ### `CategoryFilter`
 
@@ -241,7 +236,12 @@ function useAttractionsByProvince(
   - **Loading:** 3 skeleton cards
   - **Empty:** "ไม่พบสถานที่ท่องเที่ยวสำหรับหมวดหมู่นี้"
   - **Error:** never shown — error silently falls back to static data
-- Province `nameTh` + `name` as panel heading
+
+---
+
+## Homepage Integration
+
+`ThailandCard` component (`src/components/home/ThailandCard.tsx`) renders in the **More Projects** grid on `HomePage`. It links to `/thailand` and uses a map-gradient thumbnail matching the region color palette.
 
 ---
 
@@ -264,10 +264,10 @@ Rendered under `<RootLayout>` (nav + footer). Registered in `src/constants/route
 │                           │  [Province nameTh / idle]    │
 │   ThailandMap             │  CategoryFilter pills        │
 │   SVG  (~55% width)       ├──────────────────────────────┤
-│                           │  AttractionCard ★★★★★  4.9  │
-│   click province          │  AttractionCard ★★★★½  4.6  │
-│   → highlighted primary   │  AttractionCard ★★★★   4.2  │
-│                           │  (scrollable, max 10 items)  │
+│   region-colored          │  AttractionCard ★★★★★  4.0  │
+│   background #0E1020      │  AttractionCard ★★★★★  4.0  │
+│   click province          │  AttractionCard ★★★★★  4.0  │
+│   → highlighted primary   │  (sorted by viewer count)    │
 └───────────────────────────┴──────────────────────────────┘
   Panel: sticky top-6, max-height 100vh − 6rem, overflow-hidden
 ```
@@ -285,34 +285,6 @@ Rendered under `<RootLayout>` (nav + footer). Registered in `src/constants/route
 └─────────────────────────┘
 ```
 
-- **File:** `src/pages/ThailandPage.tsx`
-- State: `selectedProvince: Province | null`, `filter: AttractionFilter`
-- Province change → resets `filter` to `'all'`
-
----
-
-## Sorting & Filtering Logic
-
-| Behavior | Detail |
-|----------|--------|
-| Default sort | `rating` descending |
-| Tie-breaking | alphabetical by `name` |
-| Category filter | Client-side after API response; does not re-fetch |
-| Province change | Resets filter to `'all'`, triggers new query |
-| Max results | 10 per search (Foursquare `limit=10`) |
-| Rating default | `4.0` when Foursquare `rating` field is absent |
-
----
-
-## Map Interaction States
-
-| State | Province fill | Stroke | Tooltip | Panel |
-|-------|--------------|--------|---------|-------|
-| Idle | `surface-raised` | `surface-border` | — | Idle prompt |
-| Hover | `#1a1a2e` | `primary` | name + nameTh | unchanged |
-| Selected | `primary` | `primary` | — | Attractions list |
-| Selected + hover | `primary` | `primary` | name + nameTh | unchanged |
-
 ---
 
 ## Dependencies
@@ -320,31 +292,32 @@ Rendered under `<RootLayout>` (nav + footer). Registered in `src/constants/route
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `react-simple-maps` | ^3.0.0 | SVG map rendering |
-| `@types/react-simple-maps` | ^3.0.0 | TypeScript types for react-simple-maps |
+| `@types/react-simple-maps` | ^3.0.0 | TypeScript types |
 | `topojson-client` | ^3.1.0 | TopoJSON type support |
 | `@types/topojson-client` | ^3.1.4 | TypeScript types |
 | `prop-types` | ^15.8.1 | Peer dependency of react-simple-maps |
 
-Map data: `public/data/thailand-provinces.json` (~4.5 MB TopoJSON, public domain via GADM, 76 provinces + 2 lake geometries filtered at render time)
+Map data: `public/data/thailand-provinces.json` (~4.5 MB TopoJSON, public domain via GADM)
 
 ---
 
 ## Acceptance Criteria
 
-- [x] Thailand SVG map renders all province boundaries
-- [x] Hover highlights province + shows tooltip (name EN + TH)
-- [x] Clicking selects province — fill changes to primary
-- [x] `VITE_FOURSQUARE_API_KEY` unset → static data loads silently
-- [x] `VITE_FOURSQUARE_API_KEY` set → Foursquare API called with `near` + `categories`
-- [x] Foursquare rating (0–10) converted to display stars (0–5)
+- [x] Thailand SVG map renders all province boundaries with region-based colors
+- [x] Hover highlights province with brighter region tone + shows tooltip (name EN + TH)
+- [x] Clicking selects province — fill changes to primary (`#6366F1`)
+- [x] `VITE_TAT_API_KEY` unset → static data loads silently
+- [x] `VITE_TAT_API_KEY` set → TAT API called via proxy with `province_id` + optional `keyword`
+- [x] Results sorted by `viewer` count desc (most popular first)
 - [x] API error → silent fallback to static data (no error state shown)
-- [x] Results sorted by `rating` desc (highest first)
-- [x] Category pills filter client-side without re-fetching
+- [x] Category pills filter via keyword param — triggers new query
 - [x] Province change resets category to "All" and re-fetches
 - [x] Idle / loading / empty states render correctly
 - [x] Desktop: map left 55% / panel right 45%, panel sticky
 - [x] Mobile: map stacked above panel, full width
 - [x] `useReducedMotion()` disables hover transitions (ADR-003)
+- [x] CORS handled via Vite proxy (dev) and Nginx proxy (production)
+- [x] `ThailandCard` appears in "More Projects" section on HomePage
 - [x] `npm run type-check` passes
 
 ---
@@ -356,6 +329,7 @@ Map data: `public/data/thailand-provinces.json` (~4.5 MB TopoJSON, public domain
 - Deep-link URL per province (`/thailand/chiang-mai`)
 - Pagination beyond 10 results
 - Favorites / bookmarking
+- Server-side caching of TAT API responses
 
 ---
 
@@ -364,9 +338,9 @@ Map data: `public/data/thailand-provinces.json` (~4.5 MB TopoJSON, public domain
 | Limitation | Detail |
 |-----------|--------|
 | Static coverage | Only 10 provinces have fallback attraction data |
-| Foursquare free tier | 1 000 req/day shared across all visitors |
-| Rating availability | Foursquare omits `rating` for venues with few check-ins → defaults to 4.0 |
-| No CORS proxy | Foursquare supports browser CORS; TAT API did not |
+| No ratings | TAT API does not provide attraction ratings — all display as 4.0 stars |
+| Keyword filtering | TAT API has no sub-categories; keyword search may miss some relevant places |
+| CORS proxy required | TAT API blocks browser requests — must go through proxy |
 
 ---
 
@@ -374,7 +348,7 @@ Map data: `public/data/thailand-provinces.json` (~4.5 MB TopoJSON, public domain
 
 | Phase | Addition |
 |-------|----------|
-| 2 | Railway API caching Foursquare responses (reduce daily quota pressure) |
+| 2 | NestJS backend caches TAT API responses (reduce latency, add rate-limit protection) |
 | 3 | Admin panel to curate/override attraction data per province |
 | 4 | Deep-link routes per province with SEO meta tags |
 | 4 | Map zoom / pan controls |

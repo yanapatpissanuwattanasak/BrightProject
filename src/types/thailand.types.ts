@@ -16,7 +16,8 @@ export interface Province {
   id: string       // slugified TopoJSON NAME_1, used for map matching
   name: string     // English (matches TopoJSON NAME_1 exactly)
   nameTh: string   // Thai name
-  tatName: string  // English name used for Foursquare `near` param
+  tatName: string  // English display name
+  tatId: number    // TAT Data API numeric province ID
   region: Region
 }
 

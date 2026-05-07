@@ -4,7 +4,7 @@ import { fetchAttractionsByProvince } from '@/lib/api/thailand'
 import { STATIC_ATTRACTIONS } from '@/data/thailand'
 import type { Province, AttractionCategory, AttractionFilter } from '@/types/thailand.types'
 
-const USE_STATIC = !import.meta.env.VITE_FOURSQUARE_API_KEY
+const USE_STATIC = !import.meta.env.VITE_TAT_API_KEY
 
 function staticQuery(provinceId: string, category?: AttractionCategory) {
   const base = STATIC_ATTRACTIONS.filter((a) => a.provinceId === provinceId)
