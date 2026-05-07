@@ -5,7 +5,7 @@ const BASE = '/tat-api'
 function headers(): HeadersInit {
   return {
     'x-api-key': import.meta.env.VITE_TAT_API_KEY,
-    'Accept-Language': 'en',
+    'Accept-Language': 'th',
   }
 }
 
