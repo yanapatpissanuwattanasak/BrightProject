@@ -27,6 +27,16 @@
     color-scheme: dark;
   }
 
+  html:not(.dark) {
+    color-scheme: light;
+    --color-surface: #FFFFFF;
+    --color-surface-raised: #F8FAFC;
+    --color-surface-border: #E2E8F0;
+    --color-text-primary: #0F172A;
+    --color-text-secondary: #475569;
+    --color-text-muted: #94A3B8;
+  }
+
   * {
     box-sizing: border-box;
   }

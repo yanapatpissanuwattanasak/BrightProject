@@ -128,6 +128,7 @@ When a project skill is invoked, read its full definition from `.claude/skills/<
 | `add-component` | Add a new React component following project conventions |
 | `add-hook` | Add a new TanStack Query data hook (static/API dual-mode pattern) |
 | `add-page` | Add a new page to the React SPA following existing conventions |
+| `feature-plan` | Analyze acceptance criteria from `reqFeature/` against the codebase and produce a file-level work plan |
 | `function-design` | Guidelines for writing clean, concise, publicly callable functions |
 | `naming-convention` | Variable, function, and type naming rules for this project |
 | `clean-architecture` | Guide for adding entities, use cases, and modules to the NestJS API using Clean Architecture |
