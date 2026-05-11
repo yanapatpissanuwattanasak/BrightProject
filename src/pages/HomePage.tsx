@@ -5,6 +5,7 @@ import { ProjectsGrid } from '@/components/home/ProjectsGrid'
 import { SkillsSection } from '@/components/home/SkillsSection'
 import { WelcomeOverlay } from '@/components/home/WelcomeOverlay'
 import { ThailandCard } from '@/components/home/ThailandCard'
+import { AnonymousChat } from '@/components/home/AnonymousChat'
 import { useFeaturedProjects } from '@/hooks/useFeaturedProjects'
 import { usePublishedProjects } from '@/hooks/usePublishedProjects'
 
@@ -37,6 +38,7 @@ export default function HomePage() {
       <ProjectsGrid projects={otherProjects} isLoading={isLoading} appendCards={<ThailandCard />} />
 
       <SkillsSection />
+      <AnonymousChat />
     </>
   )
 }

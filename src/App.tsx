@@ -14,6 +14,7 @@ import NotFoundPage from '@/pages/NotFoundPage'
 import { TimeBlockingPage } from '@/pages/TimeBlockingPage'
 import { TarotPage } from '@/pages/TarotPage'
 import ThailandPage from '@/pages/ThailandPage'
+import ChatPage from '@/pages/ChatPage'
 
 // Admin pages — lazy-loaded, separate chunk
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
@@ -38,6 +39,7 @@ export default function App() {
           <Route path={ROUTES.ABOUT} element={<AboutPage />} />
           <Route path={ROUTES.CONTACT} element={<ContactPage />} />
           <Route path={ROUTES.THAILAND} element={<ThailandPage />} />
+          <Route path={ROUTES.CHAT} element={<ChatPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 
