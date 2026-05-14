@@ -4,25 +4,36 @@ export type BlockTypeDef = {
   color: string
 }
 
-export type Block = {
+export type Task = {
   id: string
   title: string
-  start: number   // minutes from midnight (0–1439)
-  end: number     // minutes from midnight (1–1440)
-  typeId: string  // references BlockTypeDef.id
-  color: string
+  done: boolean
+  typeId?: string
+  estimatedMinutes?: number
   note?: string
 }
 
-export type DaySchedule = {
-  date: string    // YYYY-MM-DD
-  blocks: Block[]
+export type TimeSlot = {
+  id: string
+  label: string
+  startTime?: string   // HH:MM — optional
+  endTime?: string     // HH:MM — optional
+  color: string
+  tasks: Task[]
+  collapsed?: boolean
 }
 
-export type Summary = {
-  totalHoursByType: Record<string, number>
-  freeTime: number          // hours
-  utilizationRate: number   // 0–100
+export type DaySchedule = {
+  date: string
+  slots: TimeSlot[]
+  unscheduled: Task[]
+}
+
+export type DaySummary = {
+  totalTasks: number
+  doneTasks: number
+  estimatedMinutesByType: Record<string, number>
+  estimatedMinutesTotal: number
 }
 
 export const DEFAULT_BLOCK_TYPES: BlockTypeDef[] = [

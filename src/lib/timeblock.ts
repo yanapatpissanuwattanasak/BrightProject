@@ -1,12 +1,5 @@
-import type { Block, BlockTypeDef, DaySchedule, Summary } from '@/types/timeblock'
+import type { BlockTypeDef, DaySchedule, DaySummary, Task, TimeSlot } from '@/types/timeblock'
 import { DEFAULT_BLOCK_TYPES } from '@/types/timeblock'
-
-export const SNAP_INTERVAL = 15
-export const MINUTES_IN_DAY = 1440
-
-export function snapToInterval(minutes: number, interval = SNAP_INTERVAL): number {
-  return Math.round(minutes / interval) * interval
-}
 
 export function minutesToTime(minutes: number): string {
   const h = Math.floor(minutes / 60).toString().padStart(2, '0')
@@ -35,23 +28,6 @@ export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 }
 
-export function computeSummary(schedule: DaySchedule): Summary {
-  const totalHoursByType: Record<string, number> = {}
-  let totalPlanned = 0
-
-  for (const block of schedule.blocks) {
-    const duration = (block.end - block.start) / 60
-    totalHoursByType[block.typeId] = (totalHoursByType[block.typeId] ?? 0) + duration
-    totalPlanned += block.end - block.start
-  }
-
-  return {
-    totalHoursByType,
-    freeTime: (MINUTES_IN_DAY - totalPlanned) / 60,
-    utilizationRate: Math.round((totalPlanned / MINUTES_IN_DAY) * 100),
-  }
-}
-
 export function getMonthDates(year: number, month: number): string[] {
   const dates: string[] = []
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -61,25 +37,53 @@ export function getMonthDates(year: number, month: number): string[] {
   return dates
 }
 
-// Assign non-overlapping lanes to blocks for horizontal display
-export function assignLanes(blocks: Block[]): Map<string, number> {
-  const sorted = [...blocks].sort((a, b) => a.start - b.start)
-  const laneEnds: number[] = []
-  const assignment = new Map<string, number>()
+export function computeDaySummary(schedule: DaySchedule): DaySummary {
+  const allTasks: Task[] = [
+    ...schedule.unscheduled,
+    ...schedule.slots.flatMap(s => s.tasks),
+  ]
 
-  for (const block of sorted) {
-    let lane = laneEnds.findIndex(end => end <= block.start)
-    if (lane === -1) { lane = laneEnds.length; laneEnds.push(0) }
-    laneEnds[lane] = block.end
-    assignment.set(block.id, lane)
+  const estimatedMinutesByType: Record<string, number> = {}
+  let estimatedMinutesTotal = 0
+
+  for (const task of allTasks) {
+    const mins = task.estimatedMinutes ?? 0
+    if (task.typeId && mins > 0) {
+      estimatedMinutesByType[task.typeId] = (estimatedMinutesByType[task.typeId] ?? 0) + mins
+    }
+    estimatedMinutesTotal += mins
   }
-  return assignment
+
+  return {
+    totalTasks: allTasks.length,
+    doneTasks: allTasks.filter(t => t.done).length,
+    estimatedMinutesByType,
+    estimatedMinutesTotal,
+  }
 }
 
-export function maxLanes(blocks: Block[]): number {
-  const assignment = assignLanes(blocks)
-  if (assignment.size === 0) return 1
-  return Math.max(...assignment.values()) + 1
+// --- Migration: convert old block-based schedule to slot-based ---
+function migrateOldSchedule(date: string, raw: unknown): DaySchedule {
+  const old = raw as { date: string; blocks?: unknown[] }
+  if (!Array.isArray(old.blocks) || old.blocks.length === 0) {
+    return { date, slots: [], unscheduled: [] }
+  }
+
+  const tasks: Task[] = (old.blocks as Array<{ id: string; title?: string; typeId?: string }>).map(b => ({
+    id: b.id,
+    title: b.title ?? 'Untitled',
+    done: false,
+    typeId: b.typeId,
+  }))
+
+  const slot: TimeSlot = {
+    id: generateId(),
+    label: 'Migrated',
+    color: '#6366F1',
+    tasks,
+  }
+
+  return { date, slots: [slot], unscheduled: [] }
 }
 
 const STORAGE_KEY = 'timeblocking-schedules'
@@ -88,11 +92,22 @@ const TYPES_KEY = 'timeblocking-types'
 export function loadSchedule(date: string): DaySchedule {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { date, blocks: [] }
-    const all: Record<string, DaySchedule> = JSON.parse(raw)
-    return all[date] ?? { date, blocks: [] }
+    if (!raw) return { date, slots: [], unscheduled: [] }
+    const all: Record<string, unknown> = JSON.parse(raw)
+    const entry = all[date]
+    if (!entry) return { date, slots: [], unscheduled: [] }
+
+    // detect old schema (has blocks, no slots)
+    const e = entry as Record<string, unknown>
+    if ('blocks' in e && !('slots' in e)) {
+      const migrated = migrateOldSchedule(date, entry)
+      saveSchedule(migrated)
+      return migrated
+    }
+
+    return entry as DaySchedule
   } catch {
-    return { date, blocks: [] }
+    return { date, slots: [], unscheduled: [] }
   }
 }
 
@@ -110,7 +125,18 @@ export function saveSchedule(schedule: DaySchedule): void {
 export function loadAllSchedules(): Record<string, DaySchedule> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
+    if (!raw) return {}
+    const all: Record<string, unknown> = JSON.parse(raw)
+    const result: Record<string, DaySchedule> = {}
+    for (const [date, entry] of Object.entries(all)) {
+      const e = entry as Record<string, unknown>
+      if ('blocks' in e && !('slots' in e)) {
+        result[date] = migrateOldSchedule(date, entry)
+      } else {
+        result[date] = entry as DaySchedule
+      }
+    }
+    return result
   } catch {
     return {}
   }
@@ -133,4 +159,3 @@ export function saveBlockTypes(types: BlockTypeDef[]): void {
     // storage unavailable
   }
 }
-

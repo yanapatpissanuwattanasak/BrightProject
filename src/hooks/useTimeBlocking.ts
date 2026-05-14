@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { Block, BlockTypeDef, DaySchedule } from '@/types/timeblock'
+import type { BlockTypeDef, DaySchedule, Task, TimeSlot } from '@/types/timeblock'
 import {
   loadSchedule,
   saveSchedule,
   loadBlockTypes,
   saveBlockTypes,
-  computeSummary,
+  computeDaySummary,
   todayString,
   generateId,
 } from '@/lib/timeblock'
@@ -46,24 +46,118 @@ export function useTimeBlocking() {
     })
   }
 
-  const addBlock = useCallback((block: Block) => {
-    setSchedule(s => ({ ...s, blocks: [...s.blocks, block] }))
+  // --- Slot CRUD ---
+
+  const addSlot = useCallback((slot: Omit<TimeSlot, 'id' | 'tasks'>) => {
+    const newSlot: TimeSlot = { ...slot, id: generateId(), tasks: [] }
+    setSchedule(s => ({ ...s, slots: [...s.slots, newSlot] }))
   }, [])
 
-  const updateBlock = useCallback((block: Block) => {
+  const updateSlot = useCallback((slotId: string, patch: Partial<Omit<TimeSlot, 'id' | 'tasks'>>) => {
     setSchedule(s => ({
       ...s,
-      blocks: s.blocks.map(b => b.id === block.id ? block : b),
+      slots: s.slots.map(sl => sl.id === slotId ? { ...sl, ...patch } : sl),
     }))
   }, [])
 
-  const deleteBlock = useCallback((id: string) => {
-    setSchedule(s => ({ ...s, blocks: s.blocks.filter(b => b.id !== id) }))
+  const deleteSlot = useCallback((slotId: string) => {
+    setSchedule(s => ({ ...s, slots: s.slots.filter(sl => sl.id !== slotId) }))
+  }, [])
+
+  const toggleSlotCollapsed = useCallback((slotId: string) => {
+    setSchedule(s => ({
+      ...s,
+      slots: s.slots.map(sl => sl.id === slotId ? { ...sl, collapsed: !sl.collapsed } : sl),
+    }))
+  }, [])
+
+  // --- Task CRUD ---
+
+  const addTask = useCallback((slotId: string, title: string) => {
+    const task: Task = { id: generateId(), title, done: false }
+    setSchedule(s => ({
+      ...s,
+      slots: s.slots.map(sl =>
+        sl.id === slotId ? { ...sl, tasks: [...sl.tasks, task] } : sl
+      ),
+    }))
+  }, [])
+
+  const addUnscheduledTask = useCallback((title: string) => {
+    const task: Task = { id: generateId(), title, done: false }
+    setSchedule(s => ({ ...s, unscheduled: [...s.unscheduled, task] }))
+  }, [])
+
+  const updateTask = useCallback((taskId: string, patch: Partial<Omit<Task, 'id'>>) => {
+    setSchedule(s => {
+      const updateList = (tasks: Task[]) =>
+        tasks.map(t => t.id === taskId ? { ...t, ...patch } : t)
+      return {
+        ...s,
+        slots: s.slots.map(sl => ({ ...sl, tasks: updateList(sl.tasks) })),
+        unscheduled: updateList(s.unscheduled),
+      }
+    })
+  }, [])
+
+  const deleteTask = useCallback((taskId: string) => {
+    setSchedule(s => ({
+      ...s,
+      slots: s.slots.map(sl => ({ ...sl, tasks: sl.tasks.filter(t => t.id !== taskId) })),
+      unscheduled: s.unscheduled.filter(t => t.id !== taskId),
+    }))
+  }, [])
+
+  const toggleTask = useCallback((taskId: string) => {
+    setSchedule(s => {
+      const toggle = (tasks: Task[]) =>
+        tasks.map(t => t.id === taskId ? { ...t, done: !t.done } : t)
+      return {
+        ...s,
+        slots: s.slots.map(sl => ({ ...sl, tasks: toggle(sl.tasks) })),
+        unscheduled: toggle(s.unscheduled),
+      }
+    })
+  }, [])
+
+  const moveTaskToSlot = useCallback((taskId: string, targetSlotId: string | null) => {
+    setSchedule(s => {
+      let task: Task | undefined
+
+      const newSlots = s.slots.map(sl => {
+        const found = sl.tasks.find(t => t.id === taskId)
+        if (found) { task = found }
+        return { ...sl, tasks: sl.tasks.filter(t => t.id !== taskId) }
+      })
+
+      let newUnscheduled = s.unscheduled.filter(t => {
+        if (t.id === taskId) { task = t; return false }
+        return true
+      })
+
+      if (!task) return s
+
+      if (targetSlotId === null) {
+        newUnscheduled = [...newUnscheduled, task]
+      } else {
+        return {
+          ...s,
+          slots: newSlots.map(sl =>
+            sl.id === targetSlotId ? { ...sl, tasks: [...sl.tasks, task!] } : sl
+          ),
+          unscheduled: newUnscheduled,
+        }
+      }
+
+      return { ...s, slots: newSlots, unscheduled: newUnscheduled }
+    })
   }, [])
 
   const clearDay = useCallback(() => {
-    setSchedule(s => ({ ...s, blocks: [] }))
+    setSchedule(s => ({ ...s, slots: [], unscheduled: [] }))
   }, [])
+
+  // --- Block types ---
 
   const addBlockType = useCallback((name: string, color: string): BlockTypeDef => {
     const newType: BlockTypeDef = { id: generateId(), name, color }
@@ -73,17 +167,13 @@ export function useTimeBlocking() {
 
   const updateBlockType = useCallback((type: BlockTypeDef) => {
     setBlockTypes(ts => ts.map(t => t.id === type.id ? type : t))
-    setSchedule(s => ({
-      ...s,
-      blocks: s.blocks.map(b => b.typeId === type.id ? { ...b, color: type.color } : b),
-    }))
   }, [])
 
   const deleteBlockType = useCallback((id: string) => {
     setBlockTypes(ts => ts.filter(t => t.id !== id))
   }, [])
 
-  const summary = useMemo(() => computeSummary(schedule), [schedule])
+  const summary = useMemo(() => computeDaySummary(schedule), [schedule])
 
   return {
     date,
@@ -92,13 +182,19 @@ export function useTimeBlocking() {
     blockTypes,
     setDate,
     changeDate,
-    addBlock,
-    updateBlock,
-    deleteBlock,
+    addSlot,
+    updateSlot,
+    deleteSlot,
+    toggleSlotCollapsed,
+    addTask,
+    addUnscheduledTask,
+    updateTask,
+    deleteTask,
+    toggleTask,
+    moveTaskToSlot,
     clearDay,
     addBlockType,
     updateBlockType,
     deleteBlockType,
   }
 }
-

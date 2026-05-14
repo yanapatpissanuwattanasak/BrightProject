@@ -15,6 +15,7 @@ export function useAnonymousChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
 
   useEffect(() => {
+    if (!db) return
     const chatRef = ref(db, CHAT_PATH)
     onValue(chatRef, (snapshot) => {
       const data = snapshot.val()
@@ -33,6 +34,7 @@ export function useAnonymousChat() {
   }, [])
 
   function addMessage(text: string) {
+    if (!db) return
     const chatRef = ref(db, CHAT_PATH)
     const now = Date.now()
     push(chatRef, { text, timestamp: now, role: 'user' })
@@ -40,6 +42,7 @@ export function useAnonymousChat() {
   }
 
   function clearMessages() {
+    if (!db) return
     remove(ref(db, CHAT_PATH))
   }
 

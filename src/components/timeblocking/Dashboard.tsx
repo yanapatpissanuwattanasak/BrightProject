@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { BlockTypeDef } from '@/types/timeblock'
-import { loadAllSchedules, computeSummary, getMonthDates } from '@/lib/timeblock'
+import { loadAllSchedules, computeDaySummary, getMonthDates, minutesToDuration } from '@/lib/timeblock'
 
 type Props = {
   date: string
@@ -14,23 +14,30 @@ export function Dashboard({ date, blockTypes }: Props) {
 
   const dayData = useMemo(() => {
     const all = loadAllSchedules()
-    const schedule = all[date] ?? { date, blocks: [] }
-    return computeSummary(schedule)
+    const schedule = all[date] ?? { date, slots: [], unscheduled: [] }
+    return computeDaySummary(schedule)
   }, [date])
 
   const monthData = useMemo(() => {
     const all = loadAllSchedules()
     const dates = getMonthDates(year, monthNum - 1)
-    const totals: Record<string, number> = {}
+    const totalTasks = { done: 0, total: 0 }
+    const minutesByType: Record<string, number> = {}
+    let minutesTotal = 0
+
     for (const d of dates) {
       const schedule = all[d]
       if (!schedule) continue
-      const summary = computeSummary(schedule)
-      for (const [typeId, hours] of Object.entries(summary.totalHoursByType)) {
-        totals[typeId] = (totals[typeId] ?? 0) + hours
+      const summary = computeDaySummary(schedule)
+      totalTasks.done += summary.doneTasks
+      totalTasks.total += summary.totalTasks
+      minutesTotal += summary.estimatedMinutesTotal
+      for (const [typeId, mins] of Object.entries(summary.estimatedMinutesByType)) {
+        minutesByType[typeId] = (minutesByType[typeId] ?? 0) + mins
       }
     }
-    return totals
+
+    return { totalTasks, minutesByType, minutesTotal }
   }, [year, monthNum])
 
   const displayDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
@@ -40,14 +47,20 @@ export function Dashboard({ date, blockTypes }: Props) {
     month: 'long', year: 'numeric',
   })
 
-  const currentData = view === 'day' ? dayData.totalHoursByType : monthData
-  const allValues = Object.values(currentData)
-  const maxHours = allValues.length > 0 ? Math.max(...allValues, 0.1) : 0.1
-  const totalHours = allValues.reduce((a, b) => a + b, 0)
+  const currentMinutesByType = view === 'day' ? dayData.estimatedMinutesByType : monthData.minutesByType
+  const maxMins = Math.max(...Object.values(currentMinutesByType), 0.1)
 
   const sortedTypes = blockTypes
-    .filter(t => (currentData[t.id] ?? 0) > 0)
-    .sort((a, b) => (currentData[b.id] ?? 0) - (currentData[a.id] ?? 0))
+    .filter(t => (currentMinutesByType[t.id] ?? 0) > 0)
+    .sort((a, b) => (currentMinutesByType[b.id] ?? 0) - (currentMinutesByType[a.id] ?? 0))
+
+  const dayCompletionPct = dayData.totalTasks > 0
+    ? Math.round((dayData.doneTasks / dayData.totalTasks) * 100)
+    : 0
+
+  const monthCompletionPct = monthData.totalTasks.total > 0
+    ? Math.round((monthData.totalTasks.done / monthData.totalTasks.total) * 100)
+    : 0
 
   return (
     <div className="h-full overflow-y-auto p-5 space-y-5">
@@ -75,51 +88,67 @@ export function Dashboard({ date, blockTypes }: Props) {
       {view === 'day' && (
         <div className="grid grid-cols-3 gap-2">
           <div className="p-3 rounded-lg bg-surface border border-surface-border col-span-1">
-            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Utilized</p>
-            <p className="text-2xl font-bold text-text-primary font-mono">{dayData.utilizationRate}%</p>
+            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Done</p>
+            <p className="text-2xl font-bold text-text-primary font-mono">{dayCompletionPct}%</p>
             <div className="h-1 bg-surface-border rounded-full mt-2 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
-                  width: `${dayData.utilizationRate}%`,
-                  backgroundColor: dayData.utilizationRate > 80 ? '#22C55E' : '#6366F1',
+                  width: `${dayCompletionPct}%`,
+                  backgroundColor: dayCompletionPct === 100 ? '#22C55E' : '#6366F1',
                 }}
               />
             </div>
           </div>
           <div className="p-3 rounded-lg bg-surface border border-surface-border">
-            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Planned</p>
-            <p className="text-2xl font-bold text-text-primary font-mono">{totalHours.toFixed(1)}h</p>
+            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Tasks</p>
+            <p className="text-2xl font-bold text-text-primary font-mono">
+              {dayData.doneTasks}<span className="text-sm text-text-muted">/{dayData.totalTasks}</span>
+            </p>
           </div>
           <div className="p-3 rounded-lg bg-surface border border-surface-border">
-            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Free</p>
-            <p className="text-2xl font-bold text-text-primary font-mono">{dayData.freeTime.toFixed(1)}h</p>
+            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Estimated</p>
+            <p className="text-lg font-bold text-text-primary font-mono">
+              {dayData.estimatedMinutesTotal > 0 ? minutesToDuration(dayData.estimatedMinutesTotal) : '—'}
+            </p>
           </div>
         </div>
       )}
 
-      {/* Month total */}
+      {/* Month stats */}
       {view === 'month' && (
-        <div className="p-3 rounded-lg bg-surface border border-surface-border w-fit">
-          <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Total this month</p>
-          <p className="text-2xl font-bold text-text-primary font-mono">{totalHours.toFixed(1)}h</p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="p-3 rounded-lg bg-surface border border-surface-border">
+            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Done</p>
+            <p className="text-2xl font-bold text-text-primary font-mono">{monthCompletionPct}%</p>
+          </div>
+          <div className="p-3 rounded-lg bg-surface border border-surface-border">
+            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Tasks</p>
+            <p className="text-2xl font-bold text-text-primary font-mono">
+              {monthData.totalTasks.done}<span className="text-sm text-text-muted">/{monthData.totalTasks.total}</span>
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-surface border border-surface-border">
+            <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Estimated</p>
+            <p className="text-lg font-bold text-text-primary font-mono">
+              {monthData.minutesTotal > 0 ? minutesToDuration(monthData.minutesTotal) : '—'}
+            </p>
+          </div>
         </div>
       )}
 
       {/* Per-type breakdown */}
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
-          Time by Type — {view === 'day' ? 'Today' : 'This Month'}
-        </p>
-
-        {sortedTypes.length === 0 ? (
-          <p className="text-xs text-text-muted italic">No blocks recorded.</p>
-        ) : (
+      {sortedTypes.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
+            Estimated by type
+          </p>
           <div className="flex flex-col gap-4">
             {sortedTypes.map(type => {
-              const hours = currentData[type.id] ?? 0
-              const pct = totalHours > 0 ? Math.round((hours / totalHours) * 100) : 0
-              const barPct = (hours / maxHours) * 100
+              const mins = currentMinutesByType[type.id] ?? 0
+              const totalMins = Object.values(currentMinutesByType).reduce((a, b) => a + b, 0)
+              const pct = totalMins > 0 ? Math.round((mins / totalMins) * 100) : 0
+              const barPct = (mins / maxMins) * 100
 
               return (
                 <div key={type.id}>
@@ -130,7 +159,7 @@ export function Dashboard({ date, blockTypes }: Props) {
                     </div>
                     <div className="flex items-center gap-2 font-mono">
                       <span className="text-[11px] text-text-muted">{pct}%</span>
-                      <span className="text-xs font-semibold text-text-primary">{hours.toFixed(1)}h</span>
+                      <span className="text-xs font-semibold text-text-primary">{minutesToDuration(mins)}</span>
                     </div>
                   </div>
                   <div className="h-2 bg-surface-border rounded-full overflow-hidden">
@@ -143,8 +172,12 @@ export function Dashboard({ date, blockTypes }: Props) {
               )
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {sortedTypes.length === 0 && (
+        <p className="text-xs text-text-muted italic">No tasks with estimates recorded.</p>
+      )}
     </div>
   )
 }

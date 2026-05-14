@@ -29,6 +29,7 @@ export function useChatRoom() {
   const { sessionId, nickname } = getSession()
 
   useEffect(() => {
+    if (!db) return
     const chatRef = ref(db, ROOM_PATH)
     onValue(chatRef, (snapshot) => {
       const data = snapshot.val()
@@ -47,6 +48,7 @@ export function useChatRoom() {
   }, [])
 
   function sendMessage(text: string) {
+    if (!db) return
     const trimmed = text.trim()
     if (!trimmed) return
     push(ref(db, ROOM_PATH), {

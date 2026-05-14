@@ -1,46 +1,58 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { Block } from '@/types/timeblock'
+import type { Task, TimeSlot } from '@/types/timeblock'
 import { useTimeBlocking } from '@/hooks/useTimeBlocking'
-import { HorizontalGrid } from '@/components/timeblocking/HorizontalGrid'
+import { DayBoard } from '@/components/timeblocking/DayBoard'
 import { TimeblockSidebar } from '@/components/timeblocking/TimeblockSidebar'
-import { BlockModal } from '@/components/timeblocking/BlockModal'
+import { SlotModal } from '@/components/timeblocking/SlotModal'
+import { TaskModal } from '@/components/timeblocking/TaskModal'
 import { BlockTypeManager } from '@/components/timeblocking/BlockTypeManager'
 import { Dashboard } from '@/components/timeblocking/Dashboard'
-import { generateId } from '@/lib/timeblock'
 import { ROUTES } from '@/constants/routes'
 
-type Tab = 'calendar' | 'dashboard' | 'types'
+type Tab = 'day' | 'dashboard' | 'types'
 
 export function TimeBlockingPage() {
   const navigate = useNavigate()
   const {
     date, schedule, summary, blockTypes,
-    setDate, addBlock, updateBlock, deleteBlock, clearDay,
+    setDate,
+    addSlot, updateSlot, deleteSlot, toggleSlotCollapsed,
+    addTask, addUnscheduledTask, updateTask, deleteTask, toggleTask,
+    clearDay,
     addBlockType, updateBlockType, deleteBlockType,
   } = useTimeBlocking()
 
-  const [tab, setTab] = useState<Tab>('calendar')
-  const [modalBlock, setModalBlock] = useState<Partial<Block> | null>(null)
+  const [tab, setTab] = useState<Tab>('day')
+  const [slotModal, setSlotModal] = useState<Partial<TimeSlot> | null>(null)
+  const [taskModal, setTaskModal] = useState<Task | null>(null)
 
-  function handleCellClick(startMinute: number) {
-    setModalBlock({ start: startMinute, end: Math.min(1440, startMinute + 60) })
-  }
-
-  function handleBlockClick(block: Block) {
-    setModalBlock(block)
-  }
-
-  function handleSave(block: Block) {
-    if (schedule.blocks.find(b => b.id === block.id)) {
-      updateBlock(block)
+  function handleSaveSlot(data: Omit<TimeSlot, 'id' | 'tasks'>) {
+    if (slotModal?.id) {
+      updateSlot(slotModal.id, data)
     } else {
-      addBlock({ ...block, id: block.id ?? generateId() })
+      addSlot(data)
     }
   }
 
+  function handleDeleteSlot(slotId: string) {
+    deleteSlot(slotId)
+  }
+
+  function handleClickTask(task: Task) {
+    setTaskModal(task)
+  }
+
+  function handleSaveTask(patch: Partial<Omit<Task, 'id'>>) {
+    if (taskModal) updateTask(taskModal.id, patch)
+  }
+
+  function handleDeleteTask() {
+    if (taskModal) deleteTask(taskModal.id)
+  }
+
   const TABS: { id: Tab; label: string }[] = [
-    { id: 'calendar', label: 'Calendar' },
+    { id: 'day', label: 'Day' },
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'types', label: 'Types' },
   ]
@@ -88,16 +100,16 @@ export function TimeBlockingPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {tab === 'calendar' && (
+            {tab === 'day' && (
               <>
                 <span className="text-xs text-text-muted font-mono hidden sm:block">
                   ← → navigate days
                 </span>
                 <button
-                  onClick={() => handleCellClick(540)}
+                  onClick={() => setSlotModal({})}
                   className="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors"
                 >
-                  + Block
+                  + Add Slot
                 </button>
               </>
             )}
@@ -105,14 +117,19 @@ export function TimeBlockingPage() {
         </header>
 
         {/* Tab content */}
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden relative">
 
-          {tab === 'calendar' && (
-            <HorizontalGrid
+          {tab === 'day' && (
+            <DayBoard
               schedule={schedule}
               blockTypes={blockTypes}
-              onBlockClick={handleBlockClick}
-              onCellClick={handleCellClick}
+              onEditSlot={slot => setSlotModal(slot)}
+              onDeleteSlot={handleDeleteSlot}
+              onToggleCollapse={toggleSlotCollapsed}
+              onAddTask={addTask}
+              onToggleTask={toggleTask}
+              onClickTask={handleClickTask}
+              onAddUnscheduled={addUnscheduledTask}
             />
           )}
 
@@ -133,16 +150,21 @@ export function TimeBlockingPage() {
         </div>
       </div>
 
-      {/* Modal */}
-      <BlockModal
-        block={modalBlock}
+      {/* Modals */}
+      <SlotModal
+        slot={slotModal}
+        onSave={handleSaveSlot}
+        onDelete={handleDeleteSlot}
+        onClose={() => setSlotModal(null)}
+      />
+
+      <TaskModal
+        task={taskModal}
         blockTypes={blockTypes}
-        onSave={handleSave}
-        onDelete={deleteBlock}
-        onClose={() => setModalBlock(null)}
-        onAddType={addBlockType}
+        onSave={handleSaveTask}
+        onDelete={handleDeleteTask}
+        onClose={() => setTaskModal(null)}
       />
     </div>
   )
 }
-
