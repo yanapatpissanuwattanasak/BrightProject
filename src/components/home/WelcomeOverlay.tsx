@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const STORAGE_KEY = 'welcome_last_shown'
+
 const GREETINGS = [
   { text: 'สวัสดี', lang: 'th' },
   { text: 'Hello', lang: 'en' },
@@ -64,7 +66,12 @@ export function WelcomeOverlay() {
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
-    setVisible(true)
+    const today = new Date().toDateString()
+    const lastShown = localStorage.getItem(STORAGE_KEY)
+    if (lastShown !== today) {
+      setVisible(true)
+      localStorage.setItem(STORAGE_KEY, today)
+    }
   }, [])
 
   useEffect(() => {
