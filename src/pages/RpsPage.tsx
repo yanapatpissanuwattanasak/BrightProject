@@ -1,14 +1,19 @@
-import { useState, useMemo, useCallback, memo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useMemo, useCallback, memo, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import { HEROES } from '@/data/hero'
 import type { Hero } from '@/data/hero'
 import { ROUTES } from '@/constants/routes'
+import { useRpsRoom } from '@/hooks/useRpsRoom'
+import type { ConnectionStatus } from '@/hooks/useRpsRoom'
 
 // ── Types ────────────────────────────────────────────────────
 type Choice = 'rock' | 'paper' | 'scissors'
 type RoundResult = 'win' | 'lose' | 'draw' | null
-type Phase = 'select' | 'battle' | 'gameover'
+type Phase = 'lobby' | 'select' | 'battle' | 'gameover'
+type GameMode = 'offline' | 'multiplayer'
+
+const IS_MULTIPLAYER = !!import.meta.env.VITE_RPS_WS_URL
 
 const CHOICES: Choice[] = ['rock', 'paper', 'scissors']
 
@@ -859,10 +864,220 @@ function GameOverScreen({ won, playerHero, botHero, currentStreak, bestStreak, o
   )
 }
 
+// ── Lobby Screen ─────────────────────────────────────────────
+function LobbyScreen({
+  onCreateRoom, onJoinRoom, onPlaySolo, connectionStatus, error, initialRoomCode,
+}: {
+  onCreateRoom: () => void
+  onJoinRoom: (code: string) => void
+  onPlaySolo: () => void
+  connectionStatus: ConnectionStatus
+  error: string | null
+  initialRoomCode: string
+}) {
+  const [joinCode, setJoinCode] = useState(initialRoomCode)
+
+  useEffect(() => {
+    if (initialRoomCode && connectionStatus === 'connected') {
+      onJoinRoom(initialRoomCode)
+    }
+  }, [connectionStatus]) // eslint-disable-line
+
+  function handleJoin(e: React.FormEvent) {
+    e.preventDefault()
+    if (joinCode.trim().length !== 6) return
+    onJoinRoom(joinCode.trim().toUpperCase())
+  }
+
+  const canConnect = connectionStatus === 'connected'
+
+  return (
+    <motion.div
+      key="lobby"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.45 }}
+      className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-20 gap-8"
+    >
+      {/* Title */}
+      <div className="text-center">
+        <motion.div
+          className="text-6xl mb-5 leading-none"
+          animate={{ filter: ['drop-shadow(0 0 20px #9333ea)', 'drop-shadow(0 0 50px #9333ea)', 'drop-shadow(0 0 20px #9333ea)'], scale: [1, 1.08, 1] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >⚔️</motion.div>
+        <h1 className="font-black tracking-tight leading-none">
+          <span className="block text-5xl sm:text-6xl bg-gradient-to-r from-amber-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent"
+            style={{ filter: 'drop-shadow(0 0 25px rgba(168,85,247,0.55))' }}>
+            HERO ARENA
+          </span>
+          <span className="block text-xs tracking-[0.4em] uppercase text-indigo-400/60 font-bold mt-2">
+            Multiplayer
+          </span>
+        </h1>
+      </div>
+
+      {/* Connection status */}
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-indigo-800/40 bg-black/40 backdrop-blur-sm">
+        <motion.div
+          className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-400' : connectionStatus === 'connecting' ? 'bg-amber-400' : 'bg-red-500'}`}
+          animate={connectionStatus === 'connecting' ? { opacity: [1, 0.3, 1] } : {}}
+          transition={{ duration: 1.2, repeat: Infinity }}
+        />
+        <span className="text-[10px] font-bold tracking-widest uppercase text-indigo-400/70">
+          {connectionStatus === 'connected' ? 'Server Connected' : connectionStatus === 'connecting' ? 'Connecting…' : 'Server Offline'}
+        </span>
+      </div>
+
+      {/* Error */}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="text-xs text-rose-400 bg-rose-950/50 px-4 py-2 rounded-lg border border-rose-700/40 max-w-xs text-center"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+
+      {/* Action buttons */}
+      <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+        {/* Create Room */}
+        <motion.button
+          onClick={onCreateRoom}
+          disabled={!canConnect}
+          whileHover={canConnect ? { scale: 1.04 } : {}}
+          whileTap={canConnect ? { scale: 0.96 } : {}}
+          className="w-full py-4 rounded-xl font-black text-sm tracking-[0.2em] uppercase transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+          style={{
+            background: canConnect ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #6366f1 100%)' : '#1e1b4b',
+            boxShadow: canConnect ? '0 0 30px rgba(139,92,246,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : 'none',
+            color: '#fff',
+          }}
+        >
+          ✦ &nbsp;Create Room
+        </motion.button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 w-full">
+          <div className="flex-1 h-px bg-indigo-800/40" />
+          <span className="text-[10px] text-indigo-600/50 tracking-widest uppercase">or join</span>
+          <div className="flex-1 h-px bg-indigo-800/40" />
+        </div>
+
+        {/* Join form */}
+        <form onSubmit={handleJoin} className="w-full flex gap-2">
+          <input
+            value={joinCode}
+            onChange={e => setJoinCode(e.target.value.toUpperCase().replace(/[^A-F0-9]/g, ''))}
+            maxLength={6}
+            placeholder="ROOM CODE"
+            className="flex-1 px-3 py-2.5 rounded-lg bg-black/50 border border-indigo-800/50 text-white text-xs font-bold tracking-[0.2em] uppercase placeholder-indigo-700/50 focus:outline-none focus:border-indigo-600/80 transition-colors"
+          />
+          <motion.button
+            type="submit"
+            disabled={!canConnect || joinCode.trim().length !== 6}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            className="px-4 py-2.5 rounded-lg bg-violet-900/60 border border-violet-700/50 text-violet-300 text-xs font-black tracking-wider uppercase disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            JOIN
+          </motion.button>
+        </form>
+
+        {/* Play Solo */}
+        <div className="flex items-center gap-3 w-full mt-1">
+          <div className="flex-1 h-px bg-indigo-900/30" />
+          <button
+            onClick={onPlaySolo}
+            className="text-[10px] text-indigo-600/50 hover:text-indigo-400 tracking-widest uppercase transition-colors whitespace-nowrap"
+          >
+            ⚔ &nbsp;Play Solo (vs AI)
+          </button>
+          <div className="flex-1 h-px bg-indigo-900/30" />
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ── Multiplayer Waiting Screen ────────────────────────────────
+function MpWaitingScreen({ roomCode, onCancel }: { roomCode: string; onCancel: () => void }) {
+  const [copied, setCopied] = useState(false)
+
+  function copyLink() {
+    const url = `${window.location.origin}/rps?room=${roomCode}`
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <motion.div
+      key="mp-waiting"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.45 }}
+      className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 gap-8"
+    >
+      <div className="text-center">
+        <p className="text-[10px] uppercase tracking-[0.35em] text-indigo-500/60 mb-4 font-bold">Room Code</p>
+        <motion.p
+          className="text-6xl sm:text-7xl font-black tracking-[0.25em] text-violet-300 font-mono"
+          style={{ filter: 'drop-shadow(0 0 20px rgba(139,92,246,0.7))' }}
+          animate={{ filter: ['drop-shadow(0 0 15px rgba(139,92,246,0.5))', 'drop-shadow(0 0 35px rgba(139,92,246,0.9))', 'drop-shadow(0 0 15px rgba(139,92,246,0.5))'] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          {roomCode}
+        </motion.p>
+      </div>
+
+      <motion.button
+        onClick={copyLink}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.96 }}
+        className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-indigo-700/50 bg-indigo-950/60 text-indigo-300 text-xs font-bold tracking-widest uppercase transition-colors hover:border-indigo-500/70"
+      >
+        <span>{copied ? '✓' : '📋'}</span>
+        <span>{copied ? 'Copied!' : 'Copy Link'}</span>
+      </motion.button>
+
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex items-center gap-2">
+          {[0, 1, 2].map(i => (
+            <motion.div
+              key={i}
+              className="w-2.5 h-2.5 rounded-full bg-violet-500"
+              animate={{ scale: [1, 1.6, 1], opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.4, ease: 'easeInOut' }}
+            />
+          ))}
+        </div>
+        <p className="text-sm text-indigo-400/60 tracking-wider">Waiting for challenger…</p>
+      </div>
+
+      <button
+        onClick={onCancel}
+        className="text-[10px] text-indigo-700/50 hover:text-rose-400 tracking-widest uppercase transition-colors mt-2"
+      >
+        Cancel
+      </button>
+    </motion.div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export function RpsPage() {
   const navigate = useNavigate()
-  const [phase, setPhase]         = useState<Phase>('select')
+  const [searchParams] = useSearchParams()
+  const room = useRpsRoom()
+
+  const [mode, setMode]           = useState<GameMode>('offline')
+  const [phase, setPhase]         = useState<Phase>(IS_MULTIPLAYER ? 'lobby' : 'select')
   const [playerHero, setPlayerHero] = useState<Hero | null>(null)
   const [botHero, setBotHero]     = useState<Hero | null>(null)
   const [playerHp, setPlayerHp]   = useState(3)
@@ -881,7 +1096,80 @@ export function RpsPage() {
   const [currentStreak, setCurrentStreak] = useState(() => loadStreak().current)
   const [bestStreak, setBestStreak]       = useState(() => loadStreak().best)
 
+  // ── Multiplayer: sync battle_start into local state ──────────
+  useEffect(() => {
+    if (mode !== 'multiplayer' || room.roomPhase !== 'battle') return
+    setPlayerHero(room.playerHero)
+    setBotHero(room.opponentHero)
+    setPlayerHp(room.playerHp)
+    setBotHp(room.opponentHp)
+    setPhase('battle')
+  }, [mode, room.roomPhase]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Multiplayer: round result animation ───────────────────────
+  useEffect(() => {
+    if (mode !== 'multiplayer' || !room.roundResult) return
+    const result = room.roundResult as NonNullable<RoundResult>
+    const newPHp = room.playerHp
+    const newBHp = room.opponentHp
+
+    setPlayerChoice(room.playerChoice)
+    setBotChoice(room.opponentChoice)
+    setRoundResult(result)
+
+    const t1 = setTimeout(() => {
+      if (result === 'lose') {
+        playerShake.start({ x: [0, -14, 14, -9, 9, -4, 4, 0], transition: { duration: 0.5 } })
+        playerFlash.start({ opacity: [0, 0.85, 0], transition: { duration: 0.45 } })
+        setShowPlayerDmg(true)
+        setTimeout(() => setShowPlayerDmg(false), 950)
+      } else if (result === 'win') {
+        botShake.start({ x: [0, -14, 14, -9, 9, -4, 4, 0], transition: { duration: 0.5 } })
+        botFlash.start({ opacity: [0, 0.85, 0], transition: { duration: 0.45 } })
+        setShowBotDmg(true)
+        setTimeout(() => setShowBotDmg(false), 950)
+      }
+    }, 280)
+
+    const t2 = setTimeout(() => {
+      setPlayerHp(newPHp)
+      setBotHp(newBHp)
+      setTimeout(() => {
+        if (newPHp <= 0 || newBHp <= 0) {
+          // gameover handled by the room.roomPhase effect below
+        } else {
+          setPlayerChoice(null)
+          setBotChoice(null)
+          setRoundResult(null)
+          setIsRevealing(false)
+          room.clearRoundResult()
+        }
+      }, 1100)
+    }, 750)
+
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [mode, room.roundResult]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Multiplayer: gameover ─────────────────────────────────────
+  useEffect(() => {
+    if (mode !== 'multiplayer' || room.roomPhase !== 'gameover') return
+    const gameWon = room.winner === 'player'
+    const prev = loadStreak()
+    const next = gameWon
+      ? { current: prev.current + 1, best: Math.max(prev.best, prev.current + 1) }
+      : { current: 0, best: prev.best }
+    saveStreak(next)
+    setCurrentStreak(next.current)
+    setBestStreak(next.best)
+    setPhase('gameover')
+  }, [mode, room.roomPhase, room.winner]) // eslint-disable-line react-hooks/exhaustive-deps
+
   function handleSelect(hero: Hero) {
+    if (mode === 'multiplayer') {
+      if (!room.roomCode) return
+      room.selectHero(hero, room.roomCode)
+      return
+    }
     const bot = HEROES[Math.floor(Math.random() * HEROES.length)]
     setPlayerHero(hero)
     setBotHero(bot)
@@ -889,6 +1177,12 @@ export function RpsPage() {
   }
 
   function handleChoice(choice: Choice) {
+    if (mode === 'multiplayer') {
+      if (isRevealing || !room.roomCode) return
+      setIsRevealing(true)
+      room.submitChoice(choice, room.roomCode)
+      return
+    }
     if (isRevealing) return
     const botPick  = randomChoice()
     const result   = resolveRound(choice, botPick)
@@ -940,8 +1234,16 @@ export function RpsPage() {
     }, 750)
   }
 
+  function handleCancel() {
+    room.resetRoom()
+    setMode('offline')
+    setPhase('lobby')
+  }
+
   function reset() {
-    setPhase('select')
+    if (mode === 'multiplayer') room.resetRoom()
+    setMode('offline')
+    setPhase(IS_MULTIPLAYER ? 'lobby' : 'select')
     setPlayerHero(null)
     setBotHero(null)
     setPlayerHp(3)
@@ -980,6 +1282,21 @@ export function RpsPage() {
         )}
       </AnimatePresence>
 
+      {/* Opponent disconnected banner */}
+      <AnimatePresence>
+        {mode === 'multiplayer' && room.opponentDisconnected && phase === 'battle' && (
+          <motion.div
+            key="disconnect-banner"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-1.5 rounded-full border border-amber-600/50 bg-amber-950/80 text-amber-400 text-[10px] font-bold tracking-wider whitespace-nowrap backdrop-blur-sm"
+          >
+            ⚠ Opponent disconnected — waiting 15 s…
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Back button */}
       <div className="fixed top-5 left-5 z-50">
         <button
@@ -991,11 +1308,65 @@ export function RpsPage() {
       </div>
 
       <AnimatePresence mode="wait">
-        {phase === 'select' && (
-          <SelectScreen onSelect={handleSelect} />
+        {/* Lobby */}
+        {phase === 'lobby' && (
+          <LobbyScreen
+            key="lobby"
+            onCreateRoom={() => { setPhase('select'); setMode('multiplayer'); room.createRoom() }}
+            onJoinRoom={(code) => { setPhase('select'); setMode('multiplayer'); room.joinRoom(code) }}
+            onPlaySolo={() => setPhase('select')}
+            connectionStatus={room.connectionStatus}
+            error={room.error}
+            initialRoomCode={searchParams.get('room') ?? ''}
+          />
         )}
+
+        {/* Offline hero select */}
+        {mode === 'offline' && phase === 'select' && (
+          <SelectScreen key="select" onSelect={handleSelect} />
+        )}
+
+        {/* Multiplayer: waiting for player 2 */}
+        {mode === 'multiplayer' && room.roomPhase === 'waiting-for-p2' && (
+          <MpWaitingScreen key="mp-waiting" roomCode={room.roomCode!} onCancel={handleCancel} />
+        )}
+
+        {/* Multiplayer: hero select (both players in room) */}
+        {mode === 'multiplayer' && (room.roomPhase === 'hero-select' || room.roomPhase === 'hero-selected') && (
+          <motion.div
+            key="mp-hero-select"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="contents"
+          >
+            <SelectScreen onSelect={handleSelect} />
+            {room.roomPhase === 'hero-selected' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm gap-4"
+              >
+                <div className="flex items-center gap-2">
+                  {[0, 1, 2].map(i => (
+                    <motion.div
+                      key={i}
+                      className="w-2.5 h-2.5 rounded-full bg-violet-400"
+                      animate={{ scale: [1, 1.5, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.25 }}
+                    />
+                  ))}
+                </div>
+                <p className="text-sm font-bold tracking-[0.25em] uppercase text-indigo-300/80">
+                  Waiting for opponent…
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Battle (offline + multiplayer share same phase) */}
         {phase === 'battle' && playerHero && botHero && (
           <BattleScreen
+            key="battle"
             playerHero={playerHero} botHero={botHero}
             playerHp={playerHp}    botHp={botHp}
             playerChoice={playerChoice} botChoice={botChoice}
@@ -1007,8 +1378,11 @@ export function RpsPage() {
             onChoice={handleChoice}
           />
         )}
+
+        {/* Game Over (offline + multiplayer share same phase) */}
         {phase === 'gameover' && playerHero && botHero && (
           <GameOverScreen
+            key="gameover"
             won={botHp <= 0}
             playerHero={playerHero}
             botHero={botHero}

@@ -6,6 +6,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   server: {
+    host: true,
     proxy: {
       '/tat-api': {
         target: 'https://tatdataapi.io/api/v2',
