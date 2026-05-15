@@ -1,0 +1,149 @@
+<svg width="120" height="160" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-k">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gleam-k">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="armor-body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b91c1c"/>
+      <stop offset="100%" stop-color="#450a0a"/>
+    </linearGradient>
+    <linearGradient id="armor-plate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+    <linearGradient id="sword-blade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0f9ff"/>
+      <stop offset="40%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
+    </linearGradient>
+    <linearGradient id="helmet-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9f1239"/>
+      <stop offset="100%" stop-color="#450a0a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Whole figure has subtle bob -->
+  <g>
+    <animateTransform attributeName="transform" attributeType="XML"
+      type="translate" values="0,0; 0,-4; 0,0"
+      dur="2.5s" repeatCount="indefinite"
+      calcMode="spline" keySplines="0.4 0 0.6 1; 0.4 0 0.6 1"/>
+
+    <!-- Ground shadow -->
+    <ellipse cx="55" cy="158" rx="26" ry="4" fill="#000" opacity="0.3">
+      <animate attributeName="rx" values="26;22;26" dur="2.5s" repeatCount="indefinite"
+        calcMode="spline" keySplines="0.4 0 0.6 1; 0.4 0 0.6 1"/>
+    </ellipse>
+
+    <!-- Sword (behind body) -->
+    <!-- Blade -->
+    <rect x="92" y="28" width="6" height="90" rx="2" fill="url(#sword-blade)"/>
+    <!-- Sword cross-guard -->
+    <rect x="84" y="112" width="22" height="5" rx="2" fill="url(#armor-plate)"/>
+    <!-- Sword grip -->
+    <rect x="93" y="117" width="4" height="22" rx="2" fill="#451a03"/>
+    <!-- Pommel -->
+    <circle cx="95" cy="142" r="4" fill="url(#armor-plate)"/>
+    <!-- Sword gleam animation -->
+    <rect x="93" y="28" width="2" height="80" rx="1" fill="#fff" opacity="0">
+      <animate attributeName="opacity" values="0;0.9;0;0;0" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="28;108;28;28;28" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="height" values="80;10;80;80;80" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+    </rect>
+    <!-- Sword glow -->
+    <rect x="92" y="28" width="6" height="90" rx="2" fill="#bae6fd" opacity="0.3" filter="url(#gleam-k)">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- Legs -->
+    <rect x="42" y="120" width="18" height="36" rx="4" fill="#7f1d1d"/>
+    <rect x="62" y="120" width="18" height="36" rx="4" fill="#7f1d1d"/>
+    <!-- Boot detail -->
+    <rect x="40" y="146" width="22" height="10" rx="3" fill="#450a0a"/>
+    <rect x="60" y="146" width="22" height="10" rx="3" fill="#450a0a"/>
+    <!-- Knee guards -->
+    <ellipse cx="51" cy="122" rx="10" ry="5" fill="url(#armor-plate)"/>
+    <ellipse cx="71" cy="122" rx="10" ry="5" fill="url(#armor-plate)"/>
+
+    <!-- Body / chest armor -->
+    <rect x="36" y="85" width="50" height="40" rx="5" fill="url(#armor-body)"/>
+    <!-- Chest plate -->
+    <path d="M46,88 Q61,84 76,88 L80,105 Q61,110 42,105 Z" fill="url(#armor-plate)" opacity="0.85"/>
+    <!-- Chest center line -->
+    <line x1="61" y1="87" x2="61" y2="108" stroke="#92400e" stroke-width="1.5" opacity="0.7"/>
+    <!-- Belt -->
+    <rect x="36" y="120" width="50" height="7" rx="2" fill="#92400e"/>
+    <rect x="57" y="120" width="8" height="7" rx="1" fill="url(#armor-plate)"/>
+
+    <!-- Shoulder guards -->
+    <ellipse cx="36" cy="90" rx="13" ry="9" fill="url(#armor-plate)"/>
+    <ellipse cx="86" cy="90" rx="13" ry="9" fill="url(#armor-plate)"/>
+    <ellipse cx="36" cy="89" rx="10" ry="7" fill="#b45309" opacity="0.6"/>
+    <ellipse cx="86" cy="89" rx="10" ry="7" fill="#b45309" opacity="0.6"/>
+
+    <!-- Arm holding sword -->
+    <path d="M80,95 Q88,105 90,118" stroke="#7f1d1d" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <circle cx="90" cy="120" r="6" fill="#7f1d1d"/>
+    <!-- Gauntlet -->
+    <circle cx="90" cy="120" r="6" fill="#450a0a" opacity="0.6"/>
+
+    <!-- Left arm (shield arm) -->
+    <path d="M42,95 Q28,108 26,122" stroke="#7f1d1d" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <!-- Shield -->
+    <path d="M14,108 Q14,90 26,85 Q38,90 38,108 Q38,126 26,134 Q14,126 14,108 Z" fill="url(#armor-body)"/>
+    <path d="M17,108 Q17,93 26,89 Q35,93 35,108 Q35,123 26,130 Q17,123 17,108 Z" fill="url(#armor-plate)" opacity="0.7"/>
+    <!-- Shield cross -->
+    <line x1="26" y1="92" x2="26" y2="128" stroke="#7f1d1d" stroke-width="2.5" opacity="0.8"/>
+    <line x1="15" y1="108" x2="37" y2="108" stroke="#7f1d1d" stroke-width="2.5" opacity="0.8"/>
+    <!-- Shield center gem -->
+    <circle cx="26" cy="108" r="5" fill="#ef4444" filter="url(#glow-k)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="26" cy="108" r="3" fill="#fca5a5">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Helmet -->
+    <rect x="43" y="54" width="36" height="30" rx="5" fill="url(#helmet-grad)"/>
+    <!-- Helmet top dome -->
+    <ellipse cx="61" cy="54" rx="18" ry="12" fill="#9f1239"/>
+    <!-- Helmet crest/plume -->
+    <path d="M61,42 Q55,28 52,14 Q58,22 61,30 Q64,22 70,14 Q67,28 61,42 Z" fill="#dc2626" opacity="0.9"/>
+    <path d="M61,42 Q57,30 55,18 Q60,24 61,32 Q62,24 67,18 Q65,30 61,42 Z" fill="#fca5a5" opacity="0.5"/>
+    <!-- Helmet visor slit -->
+    <rect x="44" y="66" width="34" height="6" rx="2" fill="#000" opacity="0.7"/>
+    <!-- Visor glow (eyes behind visor) -->
+    <rect x="46" y="67" width="12" height="4" rx="1" fill="#fbbf24" opacity="0.6" filter="url(#glow-k)">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="1.8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="64" y="67" width="12" height="4" rx="1" fill="#fbbf24" opacity="0.6" filter="url(#glow-k)">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="1.8s" repeatCount="indefinite" begin="0.3s"/>
+    </rect>
+    <!-- Helmet cheek guards -->
+    <rect x="43" y="60" width="6" height="20" rx="3" fill="#7f1d1d"/>
+    <rect x="73" y="60" width="6" height="20" rx="3" fill="#7f1d1d"/>
+    <!-- Helmet gold trim -->
+    <path d="M43,54 Q61,48 79,54" stroke="url(#armor-plate)" stroke-width="2.5" fill="none" opacity="0.8"/>
+    <path d="M43,72 L79,72" stroke="url(#armor-plate)" stroke-width="1.5" fill="none" opacity="0.5"/>
+
+    <!-- Aura glow at feet -->
+    <ellipse cx="61" cy="152" rx="20" ry="6" fill="#ef4444" opacity="0.15" filter="url(#glow-k)">
+      <animate attributeName="opacity" values="0.15;0.3;0.15" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Sword energy sparks -->
+    <circle cx="92" cy="40" r="2" fill="#bae6fd" filter="url(#glow-k)">
+      <animate attributeName="opacity" values="0;1;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="40;32;40" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="97" cy="60" r="1.5" fill="#e0f2fe">
+      <animate attributeName="opacity" values="0;0.8;0" dur="1.8s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

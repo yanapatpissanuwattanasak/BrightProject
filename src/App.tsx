@@ -17,6 +17,7 @@ import ThailandPage from '@/pages/ThailandPage'
 import ChatPage from '@/pages/ChatPage'
 import BangkokAQIPage from '@/pages/BangkokAQIPage'
 import PokedexPage from '@/pages/PokedexPage'
+import { RpsPage } from '@/pages/RpsPage'
 
 // Admin pages — lazy-loaded, separate chunk
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
@@ -56,6 +57,9 @@ export default function App() {
 
         {/* Pokédex — standalone (no nav layout) */}
         <Route path={ROUTES.POKEDEX} element={<PokedexPage />} />
+
+        {/* RPS Game — standalone (no nav layout) */}
+        <Route path={ROUTES.RPS} element={<RpsPage />} />
 
         {/* Admin login (no layout) */}
         <Route

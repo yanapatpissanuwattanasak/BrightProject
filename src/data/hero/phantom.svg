@@ -1,0 +1,161 @@
+<svg width="120" height="160" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-p">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-xl">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="ghost-body" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#cffafe" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#06b6d4" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#0e7490" stop-opacity="0.4"/>
+    </radialGradient>
+    <radialGradient id="ghost-core" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0.6"/>
+    </radialGradient>
+    <radialGradient id="eye-grad" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#0891b2"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Strong float + wobble on whole ghost -->
+  <g>
+    <animateTransform attributeName="transform" attributeType="XML"
+      type="translate" values="0,0; 0,-12; 0,-4; 0,-12; 0,0"
+      dur="4s" repeatCount="indefinite"
+      calcMode="spline"
+      keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+
+    <!-- Ethereal ground mist -->
+    <ellipse cx="60" cy="156" rx="30" ry="6" fill="#06b6d4" opacity="0.12" filter="url(#glow-p)">
+      <animate attributeName="rx" values="30;22;30" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.12;0.04;0.12" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Ghost tail wisps -->
+    <path d="M38,130 Q30,145 38,155 Q46,145 46,155 Q54,145 52,130 Z"
+      fill="url(#ghost-body)" opacity="0.55">
+      <animate attributeName="d"
+        values="M38,130 Q30,145 38,155 Q46,145 46,155 Q54,145 52,130 Z;
+                M38,130 Q32,148 40,158 Q47,146 46,158 Q55,147 52,130 Z;
+                M38,130 Q30,145 38,155 Q46,145 46,155 Q54,145 52,130 Z"
+        dur="2.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M52,132 Q50,148 56,158 Q62,146 62,158 Q70,147 68,132 Z"
+      fill="url(#ghost-body)" opacity="0.5">
+      <animate attributeName="d"
+        values="M52,132 Q50,148 56,158 Q62,146 62,158 Q70,147 68,132 Z;
+                M52,132 Q48,150 55,160 Q63,148 62,160 Q71,149 68,132 Z;
+                M52,132 Q50,148 56,158 Q62,146 62,158 Q70,147 68,132 Z"
+        dur="2s" repeatCount="indefinite" begin="0.3s"/>
+    </path>
+    <path d="M67,132 Q66,148 72,158 Q78,146 78,156 Q84,146 82,132 Z"
+      fill="url(#ghost-body)" opacity="0.45">
+      <animate attributeName="d"
+        values="M67,132 Q66,148 72,158 Q78,146 78,156 Q84,146 82,132 Z;
+                M67,132 Q64,150 71,160 Q79,148 78,158 Q85,148 82,132 Z;
+                M67,132 Q66,148 72,158 Q78,146 78,156 Q84,146 82,132 Z"
+        dur="3s" repeatCount="indefinite" begin="0.6s"/>
+    </path>
+
+    <!-- Main ghost body -->
+    <path d="M28,80 Q28,40 60,32 Q92,40 92,80 L90,135 Q82,145 74,134 Q66,144 60,134 Q54,144 46,134 Q38,145 30,135 Z"
+      fill="url(#ghost-body)" opacity="0.88">
+      <animate attributeName="opacity" values="0.88;0.75;0.88" dur="3s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Ghost inner glow -->
+    <ellipse cx="60" cy="75" rx="25" ry="32" fill="url(#ghost-core)" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;0.65;0.4" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="rx" values="25;28;25" dur="2.5s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Outer glow aura -->
+    <path d="M28,80 Q28,40 60,32 Q92,40 92,80 L90,135 Q82,145 74,134 Q66,144 60,134 Q54,144 46,134 Q38,145 30,135 Z"
+      fill="none" stroke="#67e8f9" stroke-width="2" opacity="0.5" filter="url(#glow-p)">
+      <animate attributeName="opacity" values="0.5;0.85;0.5" dur="2s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Skull / face outline -->
+    <ellipse cx="60" cy="72" rx="22" ry="24" fill="#cffafe" opacity="0.18"/>
+
+    <!-- Eyes — glowing cyan -->
+    <ellipse cx="49" cy="68" rx="7" ry="9" fill="#000" opacity="0.7"/>
+    <ellipse cx="71" cy="68" rx="7" ry="9" fill="#000" opacity="0.7"/>
+    <!-- Eye inner glow -->
+    <ellipse cx="49" cy="68" rx="5" ry="7" fill="url(#eye-grad)" filter="url(#glow-p)">
+      <animate attributeName="ry" values="7;9;7" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="71" cy="68" rx="5" ry="7" fill="url(#eye-grad)" filter="url(#glow-p)">
+      <animate attributeName="ry" values="7;9;7" dur="2s" repeatCount="indefinite" begin="0.4s"/>
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" begin="0.4s"/>
+    </ellipse>
+    <!-- Eye highlight -->
+    <ellipse cx="47" cy="65" rx="2" ry="2.5" fill="#fff" opacity="0.7"/>
+    <ellipse cx="69" cy="65" rx="2" ry="2.5" fill="#fff" opacity="0.7"/>
+    <!-- Eye outer glow -->
+    <ellipse cx="49" cy="68" rx="9" ry="11" fill="#06b6d4" opacity="0" filter="url(#glow-xl)">
+      <animate attributeName="opacity" values="0;0.4;0" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="71" cy="68" rx="9" ry="11" fill="#06b6d4" opacity="0" filter="url(#glow-xl)">
+      <animate attributeName="opacity" values="0;0.4;0" dur="2s" repeatCount="indefinite" begin="0.4s"/>
+    </ellipse>
+
+    <!-- Nose holes -->
+    <ellipse cx="57" cy="82" rx="2.5" ry="3" fill="#000" opacity="0.4"/>
+    <ellipse cx="63" cy="82" rx="2.5" ry="3" fill="#000" opacity="0.4"/>
+
+    <!-- Sinister grin -->
+    <path d="M46,93 Q60,102 74,93" stroke="#000" stroke-width="2" fill="none" opacity="0.5"/>
+    <path d="M50,93 Q53,97 57,93" stroke="#000" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M63,93 Q67,97 70,93" stroke="#000" stroke-width="1.5" fill="none" opacity="0.4"/>
+
+    <!-- Ghost hands / arm wisps -->
+    <ellipse cx="22" cy="100" rx="9" ry="6" fill="url(#ghost-body)" opacity="0.65">
+      <animate attributeName="cx" values="22;18;22" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.65;0.45;0.65" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="98" cy="100" rx="9" ry="6" fill="url(#ghost-body)" opacity="0.65">
+      <animate attributeName="cx" values="98;102;98" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.65;0.45;0.65" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+    </ellipse>
+
+    <!-- Floating orbs around body -->
+    <circle cx="15" cy="75" r="5" fill="#06b6d4" opacity="0.6" filter="url(#glow-p)">
+      <animate attributeName="cy" values="75;60;75" dur="3.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.9;0.6" dur="3.5s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="5;7;5" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="105" cy="85" r="4" fill="#22d3ee" opacity="0.55" filter="url(#glow-p)">
+      <animate attributeName="cy" values="85;70;85" dur="4s" repeatCount="indefinite" begin="0.8s"/>
+      <animate attributeName="opacity" values="0.55;0.85;0.55" dur="4s" repeatCount="indefinite" begin="0.8s"/>
+    </circle>
+    <circle cx="20" cy="115" r="3" fill="#67e8f9" opacity="0.5" filter="url(#glow-p)">
+      <animate attributeName="cy" values="115;105;115" dur="2.8s" repeatCount="indefinite" begin="1.2s"/>
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="2.8s" repeatCount="indefinite" begin="1.2s"/>
+    </circle>
+
+    <!-- Tiny floating particles -->
+    <circle cx="35" cy="48" r="2" fill="#cffafe">
+      <animate attributeName="opacity" values="0;0.8;0" dur="2.5s" begin="0.2s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="48;36;48" dur="2.5s" begin="0.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="82" cy="42" r="1.5" fill="#a5f3fc">
+      <animate attributeName="opacity" values="0;0.7;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="42;32;42" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="60" cy="30" r="2" fill="#67e8f9" filter="url(#glow-p)">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="30;18;30" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="110" cy="65" r="1.5" fill="#e0f2fe">
+      <animate attributeName="opacity" values="0;0.6;0" dur="1.8s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

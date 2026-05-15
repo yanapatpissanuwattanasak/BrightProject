@@ -10,6 +10,7 @@ export const ROUTES = {
   CHAT: '/chat',
   BANGKOK_AQI: '/bangkok-aqi',
   POKEDEX: '/pokedex',
+  RPS: '/rps',
   ADMIN: {
     LOGIN: '/admin/login',
     DASHBOARD: '/admin',

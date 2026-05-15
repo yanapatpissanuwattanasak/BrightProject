@@ -1,0 +1,134 @@
+<svg width="120" height="160" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-sl"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow-sl2"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="slime-body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#86efac"/>
+      <stop offset="50%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </radialGradient>
+    <radialGradient id="slime-core" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#bbf7d0" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0.5"/>
+    </radialGradient>
+    <radialGradient id="eye-sl" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#d1fae5"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </radialGradient>
+  </defs>
+  <g>
+    <!-- Bounce animation on whole body -->
+    <animateTransform attributeName="transform" attributeType="XML" type="translate"
+      values="0,0;0,-14;0,-2;0,-10;0,0" dur="1.6s" repeatCount="indefinite"
+      calcMode="spline"
+      keySplines="0.4 0 0.6 1;0.5 0 0.8 1;0.4 0 0.6 1;0.5 0 0.8 1"/>
+
+    <!-- Splat shadow (squishes during bounce) -->
+    <ellipse cx="60" cy="156" rx="28" ry="5" fill="#000" opacity="0.3">
+      <animate attributeName="rx" values="28;35;28;32;28" dur="1.6s" repeatCount="indefinite"
+        calcMode="spline" keySplines="0.4 0 0.6 1;0.5 0 0.8 1;0.4 0 0.6 1;0.5 0 0.8 1"/>
+      <animate attributeName="opacity" values="0.3;0.5;0.25;0.45;0.3" dur="1.6s" repeatCount="indefinite"
+        calcMode="spline" keySplines="0.4 0 0.6 1;0.5 0 0.8 1;0.4 0 0.6 1;0.5 0 0.8 1"/>
+    </ellipse>
+
+    <!-- Drip 1 -->
+    <ellipse cx="34" cy="138" rx="5" ry="8" fill="#22c55e" opacity="0.8">
+      <animate attributeName="ry" values="8;12;8" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="138;145;138" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Drip 2 -->
+    <ellipse cx="86" cy="140" rx="4" ry="7" fill="#16a34a" opacity="0.75">
+      <animate attributeName="ry" values="7;11;7" dur="2.3s" begin="0.8s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="140;148;140" dur="2.3s" begin="0.8s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Drip 3 (bottom center) -->
+    <ellipse cx="60" cy="146" rx="6" ry="10" fill="#22c55e" opacity="0.7">
+      <animate attributeName="ry" values="10;16;10" dur="1.8s" begin="0s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="146;155;146" dur="1.8s" begin="0s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Tiny drip drops -->
+    <circle cx="48" cy="150" r="3" fill="#4ade80" opacity="0.7">
+      <animate attributeName="cy" values="150;158;150" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.3;0.7" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="74" cy="152" r="2.5" fill="#4ade80" opacity="0.65">
+      <animate attributeName="cy" values="152;160;152" dur="1.7s" begin="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.65;0.25;0.65" dur="1.7s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Main slime body (wobbly blob) -->
+    <path d="M18,108 Q20,70 60,62 Q100,70 102,108 Q106,140 86,150 Q60,158 34,150 Q14,140 18,108 Z"
+      fill="url(#slime-body)">
+      <animate attributeName="d"
+        values="M18,108 Q20,70 60,62 Q100,70 102,108 Q106,140 86,150 Q60,158 34,150 Q14,140 18,108 Z;
+                M22,108 Q18,72 60,60 Q102,72 98,108 Q102,138 84,148 Q60,156 36,148 Q18,138 22,108 Z;
+                M16,110 Q22,68 60,64 Q98,68 104,110 Q108,142 86,152 Q60,160 34,152 Q12,142 16,110 Z;
+                M18,108 Q20,70 60,62 Q100,70 102,108 Q106,140 86,150 Q60,158 34,150 Q14,140 18,108 Z"
+        dur="1.6s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Inner glow core -->
+    <ellipse cx="60" cy="105" rx="30" ry="35" fill="url(#slime-core)">
+      <animate attributeName="rx" values="30;35;30" dur="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="35;30;35" dur="1.6s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Outer glow -->
+    <path d="M18,108 Q20,70 60,62 Q100,70 102,108 Q106,140 86,150 Q60,158 34,150 Q14,140 18,108 Z"
+      fill="none" stroke="#4ade80" stroke-width="2" opacity="0.4" filter="url(#glow-sl2)">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="1.6s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Bubble 1 (inside body) -->
+    <circle cx="42" cy="105" r="8" fill="#bbf7d0" opacity="0.3">
+      <animate attributeName="cy" values="105;95;105" dur="2s" begin="0s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="8;10;8" dur="2s" begin="0s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Bubble 2 -->
+    <circle cx="75" cy="120" r="6" fill="#bbf7d0" opacity="0.25">
+      <animate attributeName="cy" values="120;110;120" dur="2.5s" begin="0.7s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Bubble 3 -->
+    <circle cx="60" cy="90" r="10" fill="#dcfce7" opacity="0.2">
+      <animate attributeName="r" values="10;13;10" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Eyes — big cute but sinister -->
+    <ellipse cx="46" cy="95" rx="13" ry="15" fill="#0a0a0f"/>
+    <ellipse cx="74" cy="95" rx="13" ry="15" fill="#0a0a0f"/>
+    <!-- Iris -->
+    <ellipse cx="46" cy="95" rx="10" ry="12" fill="url(#eye-sl)" filter="url(#glow-sl)">
+      <animate attributeName="ry" values="12;14;12" dur="1.6s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="74" cy="95" rx="10" ry="12" fill="url(#eye-sl)" filter="url(#glow-sl)">
+      <animate attributeName="ry" values="12;14;12" dur="1.6s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Pupils (slit) -->
+    <ellipse cx="46" cy="95" rx="3" ry="9" fill="#000"/>
+    <ellipse cx="74" cy="95" rx="3" ry="9" fill="#000"/>
+    <!-- Eye glints -->
+    <circle cx="41" cy="89" r="3" fill="#fff" opacity="0.8"/>
+    <circle cx="69" cy="89" r="3" fill="#fff" opacity="0.8"/>
+
+    <!-- Mouth (wide creepy grin) -->
+    <path d="M36,115 Q60,132 84,115" stroke="#0a0a0f" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- Teeth -->
+    <path d="M44,116 L44,124 L49,120 L53,126 L57,120 L61,126 L65,120 L69,126 L73,120 L76,116"
+      stroke="#86efac" stroke-width="2" fill="#dcfce7" stroke-linejoin="round"/>
+
+    <!-- Floating toxic bubbles outside body -->
+    <circle cx="10" cy="100" r="5" fill="#22c55e" opacity="0" filter="url(#glow-sl)">
+      <animate attributeName="opacity" values="0;0.7;0" dur="2.5s" begin="0.4s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="100;85;100" dur="2.5s" begin="0.4s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="5;7;5" dur="2.5s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="110" cy="115" r="4" fill="#4ade80" opacity="0" filter="url(#glow-sl)">
+      <animate attributeName="opacity" values="0;0.6;0" dur="2s" begin="1.2s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="115;100;115" dur="2s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="14" cy="130" r="3" fill="#86efac" opacity="0">
+      <animate attributeName="opacity" values="0;0.5;0" dur="1.8s" begin="0.8s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="130;118;130" dur="1.8s" begin="0.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

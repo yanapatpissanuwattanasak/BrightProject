@@ -28,6 +28,9 @@ export function HeroSection() {
           <Button asChild variant="secondary" size="lg">
             <Link to={ROUTES.CONTACT}>Get in Touch</Link>
           </Button>
+          <Button asChild variant="ghost" size="lg">
+            <Link to={ROUTES.RPS}>⚔️ RPS Game</Link>
+          </Button>
         </div>
       </div>
     </section>

@@ -1,0 +1,127 @@
+<svg width="120" height="160" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-sm">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-lg">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="robe-grad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#5b21b6"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </radialGradient>
+    <radialGradient id="orb-grad" cx="35%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#e9d5ff"/>
+      <stop offset="60%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </radialGradient>
+    <radialGradient id="head-grad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Whole figure floats -->
+  <g>
+    <animateTransform attributeName="transform" attributeType="XML"
+      type="translate" values="0,0; 0,-7; 0,0"
+      dur="3s" repeatCount="indefinite"
+      calcMode="spline" keySplines="0.4 0 0.6 1; 0.4 0 0.6 1"/>
+
+    <!-- Ground shadow -->
+    <ellipse cx="60" cy="158" rx="22" ry="4" fill="#000" opacity="0.25">
+      <animate attributeName="rx" values="22;18;22" dur="3s" repeatCount="indefinite"
+        calcMode="spline" keySplines="0.4 0 0.6 1; 0.4 0 0.6 1"/>
+      <animate attributeName="opacity" values="0.25;0.12;0.25" dur="3s" repeatCount="indefinite"
+        calcMode="spline" keySplines="0.4 0 0.6 1; 0.4 0 0.6 1"/>
+    </ellipse>
+
+    <!-- Hat -->
+    <polygon points="60,4 33,62 87,62" fill="#2e1065"/>
+    <polygon points="60,6 36,60 84,60" fill="#3b0764"/>
+    <!-- Hat highlight stripe -->
+    <line x1="60" y1="10" x2="44" y2="55" stroke="#6d28d9" stroke-width="1.5" opacity="0.35"/>
+    <!-- Hat star -->
+    <text x="54" y="38" font-size="10" fill="#a855f7" opacity="0.7" filter="url(#glow-sm)">✦</text>
+    <!-- Hat brim -->
+    <ellipse cx="60" cy="64" rx="30" ry="8" fill="#1e1b4b"/>
+    <ellipse cx="60" cy="62" rx="28" ry="7" fill="#312e81"/>
+
+    <!-- Head -->
+    <circle cx="60" cy="80" r="17" fill="url(#head-grad)"/>
+
+    <!-- Eyes -->
+    <circle cx="53" cy="78" r="4.5" fill="#1e1b4b"/>
+    <circle cx="67" cy="78" r="4.5" fill="#1e1b4b"/>
+    <circle cx="53" cy="78" r="3" fill="#a855f7" filter="url(#glow-sm)">
+      <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="67" cy="78" r="3" fill="#a855f7" filter="url(#glow-sm)">
+      <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+    </circle>
+    <!-- Glint -->
+    <circle cx="51" cy="76" r="1" fill="#fff" opacity="0.8"/>
+    <circle cx="65" cy="76" r="1" fill="#fff" opacity="0.8"/>
+
+    <!-- Robe body -->
+    <path d="M40,93 Q60,86 80,93 L90,152 Q60,158 30,152 Z" fill="url(#robe-grad)"/>
+    <!-- Robe center line -->
+    <line x1="60" y1="93" x2="60" y2="150" stroke="#7c3aed" stroke-width="1" opacity="0.3"/>
+    <!-- Robe collar -->
+    <path d="M46,92 Q60,98 74,92" stroke="#7c3aed" stroke-width="2" fill="none" opacity="0.6"/>
+    <!-- Robe star decorations -->
+    <text x="48" y="120" font-size="7" fill="#a855f7" opacity="0.45">✦</text>
+    <text x="64" y="138" font-size="6" fill="#7c3aed" opacity="0.4">✦</text>
+    <text x="52" y="144" font-size="5" fill="#6d28d9" opacity="0.3">✦</text>
+
+    <!-- Sleeves / arms -->
+    <path d="M40,93 Q28,105 30,118" stroke="#4c1d95" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <path d="M80,93 Q92,105 90,118" stroke="#4c1d95" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <!-- Hand holding staff -->
+    <circle cx="90" cy="120" r="5" fill="#fde68a"/>
+
+    <!-- Staff -->
+    <line x1="90" y1="120" x2="98" y2="38" stroke="#3b0764" stroke-width="5" stroke-linecap="round"/>
+    <line x1="90" y1="120" x2="98" y2="38" stroke="#6d28d9" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+
+    <!-- Staff orb -->
+    <circle cx="98" cy="30" r="14" fill="#4c1d95" opacity="0.6" filter="url(#glow-lg)">
+      <animate attributeName="r" values="14;17;14" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.9;0.6" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="98" cy="30" r="11" fill="url(#orb-grad)">
+      <animate attributeName="r" values="11;13;11" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="94" cy="26" r="3.5" fill="#fff" opacity="0.55"/>
+
+    <!-- Orb sparkles -->
+    <circle cx="84" cy="23" r="2" fill="#c084fc">
+      <animate attributeName="opacity" values="0;1;0" dur="1.8s" begin="0s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="23;17;23" dur="1.8s" begin="0s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="112" cy="26" r="1.5" fill="#ddd6fe">
+      <animate attributeName="opacity" values="0;1;0" dur="2.2s" begin="0.6s" repeatCount="indefinite"/>
+      <animate attributeName="cx" values="112;116;112" dur="2.2s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="14" r="1.5" fill="#e9d5ff">
+      <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="86" cy="40" r="1" fill="#a855f7">
+      <animate attributeName="opacity" values="0;0.8;0" dur="2.5s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Ambient left sparks -->
+    <circle cx="18" cy="95" r="2" fill="#a855f7">
+      <animate attributeName="opacity" values="0;0.7;0" dur="3s" begin="0.4s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="95;82;95" dur="3s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="22" cy="120" r="1.5" fill="#7c3aed">
+      <animate attributeName="opacity" values="0;0.6;0" dur="2.8s" begin="1.4s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="120;108;120" dur="2.8s" begin="1.4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>
