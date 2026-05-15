@@ -126,6 +126,34 @@ export const STATIC_PROJECTS: Project[] = [
     tags: [STATIC_TAGS[0], STATIC_TAGS[2], STATIC_TAGS[6]],
   },
   {
+    id: '8',
+    title: 'Rock Paper Scissors — RPG Battle',
+    slug: 'rps',
+    summary:
+      'An otherworld RPG spin on rock-paper-scissors. Pick one of 15 animated heroes, face a random enemy, and cast elemental spells — Stone, Arcane, or Blades — in a best-of-3 HP battle.',
+    problem:
+      'Wanted a game project that combines character selection, real-time battle state, and heavy visual atmosphere — all without a backend.',
+    solution:
+      'Built a standalone React page with three screens (select → battle → gameover). Characters are animated SVGs loaded via import.meta.glob. Battle logic uses timed state transitions for shake, HP drain, and victory animations.',
+    techStack: ['React', 'TypeScript', 'Framer Motion', 'SVG Animation'],
+    metrics: [
+      { label: 'Heroes', value: '15' },
+      { label: 'HP per side', value: '3' },
+      { label: 'Spell types', value: '3' },
+    ],
+    loomUrl: undefined,
+    demoUrl: '/rps',
+    githubUrl: undefined,
+    thumbnailUrl: '/thumbnails/rps.svg',
+    sortOrder: 8,
+    isFeatured: false,
+    status: 'published',
+    publishedAt: '2026-05-15T00:00:00Z',
+    createdAt: '2026-05-15T00:00:00Z',
+    updatedAt: '2026-05-15T00:00:00Z',
+    tags: [STATIC_TAGS[0], STATIC_TAGS[2], STATIC_TAGS[5]],
+  },
+  {
     id: '5',
     title: 'Explore Thailand',
     slug: 'thailand',

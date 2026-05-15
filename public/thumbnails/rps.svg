@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="rps-bg" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#0d0520"/>
+      <stop offset="100%" stop-color="#0a0118"/>
+    </linearGradient>
+    <linearGradient id="rps-player" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0d0b2a"/>
+    </linearGradient>
+    <linearGradient id="rps-bot" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2d0a0a"/>
+      <stop offset="100%" stop-color="#150505"/>
+    </linearGradient>
+    <linearGradient id="rps-hp-player" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <linearGradient id="rps-hp-bot" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <radialGradient id="rps-glow-center" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rps-glow-left" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rps-glow-right" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="rps-blur"><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id="rps-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#rps-bg)"/>
+
+  <!-- Stars -->
+  <circle cx="60" cy="30" r="1.5" fill="#fff" opacity="0.3"/>
+  <circle cx="140" cy="18" r="1" fill="#fff" opacity="0.25"/>
+  <circle cx="240" cy="40" r="1.8" fill="#a78bfa" opacity="0.4"/>
+  <circle cx="400" cy="15" r="2" fill="#fff" opacity="0.35"/>
+  <circle cx="560" cy="28" r="1.5" fill="#a78bfa" opacity="0.3"/>
+  <circle cx="700" cy="20" r="1.2" fill="#fff" opacity="0.28"/>
+  <circle cx="760" cy="38" r="1.8" fill="#fff" opacity="0.22"/>
+  <circle cx="30" cy="200" r="1" fill="#fff" opacity="0.18"/>
+  <circle cx="770" cy="180" r="1" fill="#fff" opacity="0.18"/>
+
+  <!-- Arena energy beam (center horizontal) -->
+  <rect x="0" y="222" width="800" height="1" fill="#7c3aed" opacity="0.25"/>
+  <rect x="250" y="220" width="300" height="5" rx="2" fill="#7c3aed" opacity="0.15" filter="url(#rps-blur)"/>
+
+  <!-- Glow pools -->
+  <ellipse cx="200" cy="280" rx="160" ry="120" fill="url(#rps-glow-left)" filter="url(#rps-blur)"/>
+  <ellipse cx="400" cy="220" rx="120" ry="100" fill="url(#rps-glow-center)" filter="url(#rps-blur)"/>
+  <ellipse cx="600" cy="280" rx="160" ry="120" fill="url(#rps-glow-right)" filter="url(#rps-blur)"/>
+
+  <!-- ── Player panel (left) ── -->
+  <rect x="40" y="60" width="260" height="280" rx="16" fill="url(#rps-player)" stroke="#4338ca" stroke-width="1.5" opacity="0.9"/>
+  <rect x="48" y="68" width="244" height="264" rx="12" fill="none" stroke="#4338ca" stroke-width="0.6" opacity="0.35"/>
+  <!-- Corner runes -->
+  <text x="52" y="84" font-size="10" fill="#6366f1" opacity="0.5">✦</text>
+  <text x="286" y="84" font-size="10" fill="#6366f1" opacity="0.5">✦</text>
+  <text x="52" y="334" font-size="10" fill="#6366f1" opacity="0.5">✦</text>
+  <text x="286" y="334" font-size="10" fill="#6366f1" opacity="0.5">✦</text>
+  <!-- Player label -->
+  <text x="170" y="92" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#6366f1" letter-spacing="4" opacity="0.8">PLAYER</text>
+  <!-- HP bar -->
+  <rect x="60" y="100" width="220" height="10" rx="5" fill="#1e1b4b"/>
+  <rect x="60" y="100" width="220" height="10" rx="5" fill="url(#rps-hp-player)"/>
+  <text x="60" y="124" font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#4ade80" letter-spacing="1" opacity="0.75">HP ▰▰▰</text>
+  <!-- Hero silhouette (mage-like) -->
+  <ellipse cx="170" cy="210" rx="40" ry="50" fill="#312e81" opacity="0.5"/>
+  <ellipse cx="170" cy="165" rx="22" ry="20" fill="#4c1d95" opacity="0.7"/>
+  <rect x="158" y="182" width="24" height="50" rx="6" fill="#3730a3" opacity="0.8"/>
+  <!-- Staff -->
+  <line x1="196" y1="145" x2="206" y2="180" stroke="#6366f1" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="206" cy="142" r="8" fill="#818cf8" opacity="0.85" filter="url(#rps-glow)"/>
+  <!-- Glow eyes -->
+  <ellipse cx="162" cy="162" rx="4" ry="4.5" fill="#a78bfa" opacity="0.9" filter="url(#rps-glow)"/>
+  <ellipse cx="178" cy="162" rx="4" ry="4.5" fill="#a78bfa" opacity="0.9" filter="url(#rps-glow)"/>
+  <!-- Aura rings -->
+  <circle cx="170" cy="210" r="55" fill="none" stroke="#6366f1" stroke-width="1" opacity="0.2"/>
+  <circle cx="170" cy="210" r="70" fill="none" stroke="#6366f1" stroke-width="0.5" opacity="0.1"/>
+  <!-- Name -->
+  <text x="170" y="300" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="11" font-weight="700" fill="#e0e7ff" letter-spacing="2">MAGE</text>
+  <text x="170" y="318" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#6366f1" letter-spacing="3" opacity="0.65">SELECT TO BATTLE</text>
+
+  <!-- ── VS Center ── -->
+  <!-- Energy beam vertical -->
+  <rect x="398" y="60" width="4" height="280" rx="2" fill="#7c3aed" opacity="0.3"/>
+  <!-- VS badge -->
+  <circle cx="400" cy="200" r="36" fill="#0d0520" stroke="#7c3aed" stroke-width="2" opacity="0.95"/>
+  <circle cx="400" cy="200" r="30" fill="none" stroke="#a855f7" stroke-width="0.8" opacity="0.4"/>
+  <text x="400" y="207" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="20" font-weight="900" fill="#a855f7" filter="url(#rps-glow)">VS</text>
+  <!-- Spark lines from VS -->
+  <line x1="370" y1="175" x2="358" y2="163" stroke="#a855f7" stroke-width="1" opacity="0.5"/>
+  <line x1="372" y1="173" x2="362" y2="158" stroke="#c084fc" stroke-width="0.8" opacity="0.4"/>
+  <line x1="430" y1="175" x2="442" y2="163" stroke="#a855f7" stroke-width="1" opacity="0.5"/>
+  <line x1="428" y1="173" x2="438" y2="158" stroke="#c084fc" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Choice icons -->
+  <text x="400" y="120" text-anchor="middle" font-size="22" opacity="0.7">🪨</text>
+  <text x="368" y="152" text-anchor="middle" font-size="18" opacity="0.55">📜</text>
+  <text x="432" y="152" text-anchor="middle" font-size="18" opacity="0.55">⚔️</text>
+
+  <!-- Spell card labels -->
+  <rect x="342" y="240" width="50" height="26" rx="6" fill="#1e1b4b" stroke="#4338ca" stroke-width="1" opacity="0.8"/>
+  <text x="367" y="253" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="7" fill="#818cf8" letter-spacing="1">STONE</text>
+  <text x="367" y="263" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="6" fill="#6366f1" opacity="0.6">Earth</text>
+
+  <rect x="375" y="240" width="50" height="26" rx="6" fill="#0c1a2e" stroke="#0e7490" stroke-width="1" opacity="0.8"/>
+  <text x="400" y="253" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="7" fill="#22d3ee" letter-spacing="1">ARCANE</text>
+  <text x="400" y="263" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="6" fill="#06b6d4" opacity="0.6">Void</text>
+
+  <rect x="408" y="240" width="50" height="26" rx="6" fill="#1a0a2e" stroke="#7c3aed" stroke-width="1" opacity="0.8"/>
+  <text x="433" y="253" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="7" fill="#a855f7" letter-spacing="1">BLADES</text>
+  <text x="433" y="263" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="6" fill="#9333ea" opacity="0.6">Strike</text>
+
+  <!-- ── Bot panel (right) ── -->
+  <rect x="500" y="60" width="260" height="280" rx="16" fill="url(#rps-bot)" stroke="#991b1b" stroke-width="1.5" opacity="0.9"/>
+  <rect x="508" y="68" width="244" height="264" rx="12" fill="none" stroke="#991b1b" stroke-width="0.6" opacity="0.35"/>
+  <!-- Corner runes -->
+  <text x="512" y="84" font-size="10" fill="#ef4444" opacity="0.45">✦</text>
+  <text x="746" y="84" font-size="10" fill="#ef4444" opacity="0.45">✦</text>
+  <text x="512" y="334" font-size="10" fill="#ef4444" opacity="0.45">✦</text>
+  <text x="746" y="334" font-size="10" fill="#ef4444" opacity="0.45">✦</text>
+  <!-- Bot label -->
+  <text x="630" y="92" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#ef4444" letter-spacing="4" opacity="0.8">ENEMY</text>
+  <!-- HP bar -->
+  <rect x="520" y="100" width="220" height="10" rx="5" fill="#450a0a"/>
+  <rect x="520" y="100" width="165" height="10" rx="5" fill="url(#rps-hp-bot)"/>
+  <text x="520" y="124" font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#f97316" letter-spacing="1" opacity="0.75">HP ▰▰░</text>
+  <!-- Demon silhouette -->
+  <ellipse cx="630" cy="210" rx="40" ry="50" fill="#7f1d1d" opacity="0.4"/>
+  <ellipse cx="630" cy="165" rx="22" ry="20" fill="#991b1b" opacity="0.7"/>
+  <!-- Horns -->
+  <path d="M614,152 Q608,136 612,124 Q616,136 618,150 Z" fill="#450a0a"/>
+  <path d="M646,152 Q652,136 648,124 Q644,136 642,150 Z" fill="#450a0a"/>
+  <rect x="618" y="182" width="24" height="50" rx="6" fill="#7f1d1d" opacity="0.8"/>
+  <!-- Wings hint -->
+  <path d="M614,190 Q596,174 590,158 Q600,168 610,182 Z" fill="#450a0a" opacity="0.6"/>
+  <path d="M646,190 Q664,174 670,158 Q660,168 650,182 Z" fill="#450a0a" opacity="0.6"/>
+  <!-- Glowing red eyes -->
+  <ellipse cx="622" cy="162" rx="4" ry="4.5" fill="#ef4444" opacity="0.9" filter="url(#rps-glow)"/>
+  <ellipse cx="638" cy="162" rx="4" ry="4.5" fill="#ef4444" opacity="0.9" filter="url(#rps-glow)"/>
+  <!-- Aura rings -->
+  <circle cx="630" cy="210" r="55" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.18"/>
+  <circle cx="630" cy="210" r="70" fill="none" stroke="#ef4444" stroke-width="0.5" opacity="0.08"/>
+  <!-- Name -->
+  <text x="630" y="300" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="11" font-weight="700" fill="#fecaca" letter-spacing="2">DEMON</text>
+  <text x="630" y="318" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#ef4444" letter-spacing="3" opacity="0.65">RANDOM ENEMY</text>
+
+  <!-- Ground energy -->
+  <ellipse cx="400" cy="340" rx="340" ry="8" fill="#7c3aed" opacity="0.08" filter="url(#rps-blur)"/>
+
+  <!-- ── Bottom stats ── -->
+  <line x1="60" y1="372" x2="740" y2="372" stroke="#1e1b4b" stroke-width="1" opacity="0.8"/>
+
+  <text x="160" y="398" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="9" fill="#64748b" letter-spacing="1">HEROES</text>
+  <text x="160" y="420" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="22" font-weight="700" fill="#818cf8">15</text>
+
+  <text x="400" y="398" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="9" fill="#64748b" letter-spacing="1">HP PER SIDE</text>
+  <text x="400" y="420" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="22" font-weight="700" fill="#a855f7">3</text>
+
+  <text x="640" y="398" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="9" fill="#64748b" letter-spacing="1">SPELL TYPES</text>
+  <text x="640" y="420" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="22" font-weight="700" fill="#c084fc">3</text>
+
+  <text x="400" y="444" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#334155" letter-spacing="0.5">React · TypeScript · Framer Motion · SVG Animation</text>
+</svg>

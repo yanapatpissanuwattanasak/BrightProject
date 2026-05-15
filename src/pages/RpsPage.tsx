@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import { HEROES } from '@/data/hero'
@@ -56,6 +56,19 @@ const PARTICLE_DATA = Array.from({ length: 28 }, (_, i) => ({
   duration: 4 + (i % 6) * 1.5,
   delay: (i % 8) * 0.45,
 }))
+
+// ── Streak helpers ────────────────────────────────────────────
+const STREAK_KEY = 'rps-streak'
+function loadStreak(): { current: number; best: number } {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  return { current: 0, best: 0 }
+}
+function saveStreak(s: { current: number; best: number }) {
+  localStorage.setItem(STREAK_KEY, JSON.stringify(s))
+}
 
 // ── Background ───────────────────────────────────────────────
 function Background() {
@@ -159,10 +172,11 @@ function HpBar({ hp, maxHp = 3 }: { hp: number; maxHp?: number }) {
 
 // ── Hero Panel (battle) ──────────────────────────────────────
 function HeroPanel({
-  hero, hp, choice, label, isBot, shakeCtrl,
+  hero, hp, choice, label, isBot, shakeCtrl, flashCtrl, showDamage,
 }: {
   hero: Hero; hp: number; choice: Choice | null
   label: string; isBot: boolean; shakeCtrl: ReturnType<typeof useAnimation>
+  flashCtrl: ReturnType<typeof useAnimation>; showDamage: boolean
 }) {
   const aura = isBot ? 'rgba(239,68,68,0.32)' : 'rgba(99,102,241,0.35)'
   const ring = isBot ? 'rgba(239,68,68,0.35)' : 'rgba(99,102,241,0.4)'
@@ -234,6 +248,35 @@ function HeroPanel({
           className="relative z-10 w-28 h-28 sm:w-36 sm:h-36 object-contain select-none"
           style={isBot ? { transform: 'scaleX(-1)' } : undefined}
         />
+
+        {/* Hit flash overlay */}
+        <motion.div
+          animate={flashCtrl}
+          initial={{ opacity: 0 }}
+          className="absolute w-28 h-28 sm:w-36 sm:h-36 rounded-full z-20 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(239,68,68,0.85) 0%, rgba(239,68,68,0.4) 100%)' }}
+        />
+
+        {/* Floating damage number */}
+        <AnimatePresence>
+          {showDamage && (
+            <motion.div
+              key="dmg"
+              initial={{ opacity: 1, y: 10 }}
+              animate={{ opacity: 0, y: -55 }}
+              transition={{ duration: 0.85, ease: 'easeOut' }}
+              className="absolute z-30 pointer-events-none"
+              style={{ top: -8 }}
+            >
+              <span
+                className="text-2xl font-black text-red-400"
+                style={{ filter: 'drop-shadow(0 0 10px rgba(239,68,68,1)) drop-shadow(0 0 20px rgba(239,68,68,0.7))' }}
+              >
+                −1
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Name */}
@@ -243,8 +286,49 @@ function HeroPanel({
 }
 
 // ── Select Screen ─────────────────────────────────────────────
+const PANEL_EASE = [0.25, 0.46, 0.45, 0.94] as const
+const CARD_CORNERS = ['top-1.5 left-1.5', 'top-1.5 right-1.5', 'bottom-1.5 left-1.5', 'bottom-1.5 right-1.5'] as const
+
+// Memoized card — only re-renders when its own props change, NOT when hoveredHero changes
+const HeroCard = memo(function HeroCard({ hero, onSelect, onHoverStart, onHoverEnd }: {
+  hero: Hero
+  onSelect: (h: Hero) => void
+  onHoverStart: (h: Hero) => void
+  onHoverEnd: () => void
+}) {
+  return (
+    <motion.button
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      whileHover={{ y: -6, scale: 1.06 }}
+      whileTap={{ scale: 0.94 }}
+      onHoverStart={() => onHoverStart(hero)}
+      onHoverEnd={onHoverEnd}
+      onClick={() => onSelect(hero)}
+      className="group relative flex flex-col items-center gap-2 px-2 py-4 rounded-xl border border-indigo-700/35 bg-indigo-950/55 backdrop-blur-sm cursor-pointer overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-violet-500/55 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]"
+    >
+      {CARD_CORNERS.map(pos => (
+        <span key={pos} className={`absolute ${pos} text-[7px] text-violet-500/35 group-hover:text-violet-400/65 transition-colors duration-200`}>✦</span>
+      ))}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl"
+        style={{ background: 'radial-gradient(circle at center, rgba(139,92,246,0.12) 0%, transparent 70%)' }} />
+      <div className="relative">
+        <div className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          style={{ inset: -8, background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)' }} />
+        <img src={hero.src} alt={hero.name} draggable={false} className="w-16 h-16 object-contain relative z-10" />
+      </div>
+      <p className="text-[10px] font-bold text-violet-200 tracking-wider text-center relative z-10 leading-tight">{hero.name}</p>
+    </motion.button>
+  )
+})
+
 function SelectScreen({ onSelect }: { onSelect: (h: Hero) => void }) {
   const [hoveredHero, setHoveredHero] = useState<Hero | null>(null)
+  const shown = hoveredHero !== null
+
+  const handleHoverStart = useCallback((h: Hero) => setHoveredHero(h), [])
+  const handleHoverEnd = useCallback(() => setHoveredHero(null), [])
 
   return (
     <motion.div
@@ -255,55 +339,51 @@ function SelectScreen({ onSelect }: { onSelect: (h: Hero) => void }) {
       transition={{ duration: 0.5 }}
       className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-20 gap-10"
     >
-      {/* Top row: preview panel + title */}
+      {/* Top row: preview panel + title + bot panel */}
       <div className="flex items-center gap-10 w-full max-w-4xl">
-        {/* Large hero preview — slides in from left on hover */}
+
+        {/* ── Left panel (always in DOM, no mount/unmount) ── */}
         <div className="relative w-52 h-64 flex-shrink-0">
-          <AnimatePresence mode="wait">
-            {hoveredHero ? (
-              <motion.div
-                key={hoveredHero.id}
-                initial={{ x: -60, opacity: 0, scale: 0.75 }}
-                animate={{ x: 0, opacity: 1, scale: 1 }}
-                exit={{ x: -40, opacity: 0, scale: 0.85 }}
-                transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-violet-500/50 bg-indigo-950/70 backdrop-blur-sm overflow-hidden"
-                style={{ boxShadow: '0 0 40px rgba(139,92,246,0.35)' }}
-              >
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at center, rgba(139,92,246,0.18) 0%, transparent 70%)' }} />
-                <img
-                  src={hoveredHero.src}
-                  alt={hoveredHero.name}
-                  draggable={false}
-                  className="w-36 h-36 object-contain relative z-10"
-                />
-                <p className="relative z-10 text-sm font-black tracking-widest text-violet-200 mt-3 uppercase">{hoveredHero.name}</p>
-                <p className="relative z-10 text-[9px] text-indigo-400/60 tracking-[0.3em] uppercase mt-1">Select to battle</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-indigo-800/30 bg-indigo-950/30 backdrop-blur-sm"
-              >
-                <span className="text-4xl opacity-20">⚔️</span>
-                <p className="text-[9px] text-indigo-600/50 tracking-[0.25em] uppercase mt-3">Hover a hero</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div
+            animate={{ opacity: shown ? 0 : 1 }}
+            transition={{ duration: 0.18 }}
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-indigo-800/30 bg-indigo-950/30 pointer-events-none"
+          >
+            <span className="text-4xl opacity-20">⚔️</span>
+            <p className="text-[9px] text-indigo-600/50 tracking-[0.25em] uppercase mt-3">Hover a hero</p>
+          </motion.div>
+
+          <motion.div
+            animate={{ opacity: shown ? 1 : 0, x: shown ? 0 : -28, scale: shown ? 1 : 0.93 }}
+            transition={{ duration: 0.22, ease: PANEL_EASE }}
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-violet-500/50 bg-indigo-950/70 overflow-hidden pointer-events-none"
+            style={{ boxShadow: '0 0 40px rgba(139,92,246,0.35)' }}
+          >
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at center, rgba(139,92,246,0.18) 0%, transparent 70%)' }} />
+            <AnimatePresence>
+              {hoveredHero && (
+                <motion.div
+                  key={hoveredHero.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.1 }}
+                  className="relative z-10 flex flex-col items-center"
+                >
+                  <img src={hoveredHero.src} alt={hoveredHero.name} draggable={false} className="w-36 h-36 object-contain" />
+                  <p className="text-sm font-black tracking-widest text-violet-200 mt-3 uppercase">{hoveredHero.name}</p>
+                  <p className="text-[9px] text-indigo-400/60 tracking-[0.3em] uppercase mt-1">Select to battle</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
 
         {/* Title */}
         <div className="flex-1 text-center">
           <motion.div
             animate={{
-              filter: [
-                'drop-shadow(0 0 20px #9333ea)',
-                'drop-shadow(0 0 50px #9333ea)',
-                'drop-shadow(0 0 20px #9333ea)',
-              ],
+              filter: ['drop-shadow(0 0 20px #9333ea)', 'drop-shadow(0 0 50px #9333ea)', 'drop-shadow(0 0 20px #9333ea)'],
               scale: [1, 1.08, 1],
             }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -329,81 +409,47 @@ function SelectScreen({ onSelect }: { onSelect: (h: Hero) => void }) {
           <p className="text-indigo-400/45 text-xs tracking-[0.3em] uppercase">Choose wisely, warrior</p>
         </div>
 
-        {/* Right panel — bot unknown, slides in from right on hover */}
+        {/* ── Right panel (always in DOM) ── */}
         <div className="relative w-52 h-64 flex-shrink-0">
-          <AnimatePresence mode="wait">
-            {hoveredHero ? (
-              <motion.div
-                key="bot-reveal"
-                initial={{ x: 60, opacity: 0, scale: 0.75 }}
-                animate={{ x: 0, opacity: 1, scale: 1 }}
-                exit={{ x: 40, opacity: 0, scale: 0.85 }}
-                transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-rose-700/50 bg-rose-950/60 backdrop-blur-sm overflow-hidden"
-                style={{ boxShadow: '0 0 40px rgba(220,38,38,0.3)' }}
-              >
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at center, rgba(220,38,38,0.15) 0%, transparent 70%)' }} />
-                <motion.div
-                  className="relative z-10 text-7xl font-black text-rose-300/80 leading-none select-none"
-                  animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.08, 1] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  ?
-                </motion.div>
-                <p className="relative z-10 text-sm font-black tracking-widest text-rose-300 mt-4 uppercase">Unknown</p>
-                <p className="relative z-10 text-[9px] text-rose-500/60 tracking-[0.3em] uppercase mt-1">Random enemy</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="bot-empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-rose-900/25 bg-rose-950/20 backdrop-blur-sm"
-              >
-                <span className="text-4xl opacity-15">💀</span>
-                <p className="text-[9px] text-rose-700/40 tracking-[0.25em] uppercase mt-3">Enemy awaits</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div
+            animate={{ opacity: shown ? 0 : 1 }}
+            transition={{ duration: 0.18 }}
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-rose-900/25 bg-rose-950/20 pointer-events-none"
+          >
+            <span className="text-4xl opacity-15">💀</span>
+            <p className="text-[9px] text-rose-700/40 tracking-[0.25em] uppercase mt-3">Enemy awaits</p>
+          </motion.div>
+
+          <motion.div
+            animate={{ opacity: shown ? 1 : 0, x: shown ? 0 : 28, scale: shown ? 1 : 0.93 }}
+            transition={{ duration: 0.22, ease: PANEL_EASE }}
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-rose-700/50 bg-rose-950/60 overflow-hidden pointer-events-none"
+            style={{ boxShadow: '0 0 40px rgba(220,38,38,0.3)' }}
+          >
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at center, rgba(220,38,38,0.15) 0%, transparent 70%)' }} />
+            <motion.div
+              className="relative z-10 text-7xl font-black text-rose-300/80 leading-none select-none"
+              animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.08, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              ?
+            </motion.div>
+            <p className="relative z-10 text-sm font-black tracking-widest text-rose-300 mt-4 uppercase">Unknown</p>
+            <p className="relative z-10 text-[9px] text-rose-500/60 tracking-[0.3em] uppercase mt-1">Random enemy</p>
+          </motion.div>
         </div>
       </div>
 
-      {/* Hero grid — 5 per row */}
+      {/* Hero grid — 5 per row, grid renders once and doesn't re-render on hover */}
       <div className="grid grid-cols-5 gap-3 max-w-3xl w-full">
-        {HEROES.map((hero, idx) => (
-          <motion.button
+        {HEROES.map((hero) => (
+          <HeroCard
             key={hero.id}
-            initial={{ opacity: 0, y: 30, scale: 0.88 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: idx * 0.07, duration: 0.55, type: 'spring', stiffness: 200 }}
-            whileHover={{ y: -8, scale: 1.08 }}
-            whileTap={{ scale: 0.94 }}
-            onHoverStart={() => setHoveredHero(hero)}
-            onHoverEnd={() => setHoveredHero(null)}
-            onClick={() => onSelect(hero)}
-            className="group relative flex flex-col items-center gap-2 px-2 py-4 rounded-xl border border-indigo-700/35 bg-indigo-950/55 backdrop-blur-sm cursor-pointer overflow-hidden transition-all duration-300 hover:border-violet-500/55 hover:shadow-[0_0_25px_rgba(139,92,246,0.35)]"
-          >
-            {/* Corner rune deco */}
-            {['top-1.5 left-1.5','top-1.5 right-1.5','bottom-1.5 left-1.5','bottom-1.5 right-1.5'].map(pos => (
-              <span key={pos} className={`absolute ${pos} text-[7px] text-violet-500/35 group-hover:text-violet-400/65 transition-colors duration-300`}>✦</span>
-            ))}
-            {/* Hover radial glow */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"
-              style={{ background: 'radial-gradient(circle at center, rgba(139,92,246,0.12) 0%, transparent 70%)' }} />
-
-            {/* Hero image */}
-            <div className="relative">
-              <motion.div
-                className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ inset: -8, background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 70%)' }}
-              />
-              <img src={hero.src} alt={hero.name} draggable={false}
-                className="w-16 h-16 object-contain relative z-10" />
-            </div>
-
-            <p className="text-[10px] font-bold text-violet-200 tracking-wider text-center relative z-10 leading-tight">{hero.name}</p>
-          </motion.button>
+            hero={hero}
+            onSelect={onSelect}
+            onHoverStart={handleHoverStart}
+            onHoverEnd={handleHoverEnd}
+          />
         ))}
       </div>
     </motion.div>
@@ -414,7 +460,8 @@ function SelectScreen({ onSelect }: { onSelect: (h: Hero) => void }) {
 function BattleScreen({
   playerHero, botHero, playerHp, botHp,
   playerChoice, botChoice, roundResult, isRevealing,
-  playerShake, botShake, onChoice,
+  playerShake, botShake, playerFlash, botFlash,
+  showPlayerDmg, showBotDmg, currentStreak, onChoice,
 }: {
   playerHero: Hero; botHero: Hero
   playerHp: number; botHp: number
@@ -422,6 +469,10 @@ function BattleScreen({
   roundResult: RoundResult; isRevealing: boolean
   playerShake: ReturnType<typeof useAnimation>
   botShake: ReturnType<typeof useAnimation>
+  playerFlash: ReturnType<typeof useAnimation>
+  botFlash: ReturnType<typeof useAnimation>
+  showPlayerDmg: boolean; showBotDmg: boolean
+  currentStreak: number
   onChoice: (c: Choice) => void
 }) {
   const RESULT_CFG = {
@@ -444,15 +495,56 @@ function BattleScreen({
         background: 'linear-gradient(to right, rgba(99,102,241,0.04) 0%, transparent 45%, transparent 55%, rgba(239,68,68,0.04) 100%)',
       }} />
 
+      {/* Win streak badge */}
+      <AnimatePresence>
+        {currentStreak >= 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 22 }}
+            className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 px-3 py-1 rounded-full border border-orange-500/45 bg-orange-950/55 backdrop-blur-sm"
+          >
+            <motion.span
+              className="text-sm leading-none"
+              animate={{ scale: [1, 1.25, 1] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+            >🔥</motion.span>
+            <span className="text-[11px] font-black tracking-wider text-orange-400">x{currentStreak}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Heroes row */}
       <div className="flex items-start justify-center gap-3 sm:gap-6 flex-1">
         {/* Player */}
         <div className="flex-1 max-w-[170px]">
-          <HeroPanel hero={playerHero} hp={playerHp} choice={playerChoice} label="YOU" isBot={false} shakeCtrl={playerShake} />
+          <HeroPanel hero={playerHero} hp={playerHp} choice={playerChoice} label="YOU" isBot={false} shakeCtrl={playerShake} flashCtrl={playerFlash} showDamage={showPlayerDmg} />
         </div>
 
         {/* Center channel */}
-        <div className="flex flex-col items-center justify-center gap-3 pt-24 shrink-0 w-20 sm:w-28">
+        <div className="relative flex flex-col items-center justify-center gap-3 pt-24 shrink-0 w-20 sm:w-28">
+          {/* Impact burst */}
+          <AnimatePresence>
+            {roundResult && (
+              <motion.div
+                key={`burst-${roundResult}`}
+                initial={{ scale: 0.1, opacity: 1 }}
+                animate={{ scale: 5, opacity: 0 }}
+                transition={{ duration: 0.55, ease: 'easeOut' }}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  width: 36, height: 36,
+                  background: roundResult === 'win'
+                    ? 'radial-gradient(circle, rgba(52,211,153,0.95) 0%, transparent 70%)'
+                    : roundResult === 'lose'
+                    ? 'radial-gradient(circle, rgba(239,68,68,0.95) 0%, transparent 70%)'
+                    : 'radial-gradient(circle, rgba(251,191,36,0.95) 0%, transparent 70%)',
+                }}
+              />
+            )}
+          </AnimatePresence>
+
           {/* Energy beam top */}
           <motion.div
             className="w-full h-px"
@@ -506,7 +598,7 @@ function BattleScreen({
 
         {/* Bot */}
         <div className="flex-1 max-w-[170px]">
-          <HeroPanel hero={botHero} hp={botHp} choice={botChoice} label="ENEMY" isBot={true} shakeCtrl={botShake} />
+          <HeroPanel hero={botHero} hp={botHp} choice={botChoice} label="ENEMY" isBot={true} shakeCtrl={botShake} flashCtrl={botFlash} showDamage={showBotDmg} />
         </div>
       </div>
 
@@ -573,8 +665,9 @@ function BattleScreen({
 }
 
 // ── Game Over Screen ──────────────────────────────────────────
-function GameOverScreen({ won, playerHero, botHero, onReplay }: {
-  won: boolean; playerHero: Hero; botHero: Hero; onReplay: () => void
+function GameOverScreen({ won, playerHero, botHero, currentStreak, bestStreak, onReplay }: {
+  won: boolean; playerHero: Hero; botHero: Hero
+  currentStreak: number; bestStreak: number; onReplay: () => void
 }) {
   const confetti = useMemo(() =>
     won
@@ -670,6 +763,25 @@ function GameOverScreen({ won, playerHero, botHero, onReplay }: {
         </p>
       </motion.div>
 
+      {/* Streak stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="flex items-center gap-3"
+      >
+        <div className="flex flex-col items-center gap-0.5 px-6 py-3 rounded-xl border border-indigo-800/40 bg-indigo-950/50">
+          <span className="text-[9px] uppercase tracking-widest text-indigo-500/55 font-bold">Streak</span>
+          <span className="text-3xl font-black text-white leading-none">{currentStreak}</span>
+          <span className="text-[8px] text-orange-400/70">🔥 current</span>
+        </div>
+        <div className="flex flex-col items-center gap-0.5 px-6 py-3 rounded-xl border border-amber-700/35 bg-amber-950/30">
+          <span className="text-[9px] uppercase tracking-widest text-indigo-500/55 font-bold">Best</span>
+          <span className="text-3xl font-black text-amber-400 leading-none">{bestStreak}</span>
+          <span className="text-[8px] text-amber-500/60">👑 all time</span>
+        </div>
+      </motion.div>
+
       {/* Both heroes */}
       <motion.div
         initial={{ opacity: 0, y: 25 }}
@@ -762,6 +874,12 @@ export function RpsPage() {
 
   const playerShake = useAnimation()
   const botShake    = useAnimation()
+  const playerFlash = useAnimation()
+  const botFlash    = useAnimation()
+  const [showPlayerDmg, setShowPlayerDmg] = useState(false)
+  const [showBotDmg, setShowBotDmg]       = useState(false)
+  const [currentStreak, setCurrentStreak] = useState(() => loadStreak().current)
+  const [bestStreak, setBestStreak]       = useState(() => loadStreak().best)
 
   function handleSelect(hero: Hero) {
     const bot = HEROES[Math.floor(Math.random() * HEROES.length)]
@@ -782,10 +900,19 @@ export function RpsPage() {
     setRoundResult(result)
     setIsRevealing(true)
 
-    // Shake loser after short reveal pause
+    // Shake + flash loser, show floating damage number
     setTimeout(() => {
-      if (result === 'lose') playerShake.start({ x: [0, -14, 14, -9, 9, -4, 4, 0], transition: { duration: 0.5 } })
-      else if (result === 'win') botShake.start({ x: [0, -14, 14, -9, 9, -4, 4, 0], transition: { duration: 0.5 } })
+      if (result === 'lose') {
+        playerShake.start({ x: [0, -14, 14, -9, 9, -4, 4, 0], transition: { duration: 0.5 } })
+        playerFlash.start({ opacity: [0, 0.85, 0], transition: { duration: 0.45 } })
+        setShowPlayerDmg(true)
+        setTimeout(() => setShowPlayerDmg(false), 950)
+      } else if (result === 'win') {
+        botShake.start({ x: [0, -14, 14, -9, 9, -4, 4, 0], transition: { duration: 0.5 } })
+        botFlash.start({ opacity: [0, 0.85, 0], transition: { duration: 0.45 } })
+        setShowBotDmg(true)
+        setTimeout(() => setShowBotDmg(false), 950)
+      }
     }, 280)
 
     // Apply HP → check gameover
@@ -794,6 +921,14 @@ export function RpsPage() {
       setBotHp(newBHp)
       setTimeout(() => {
         if (newPHp <= 0 || newBHp <= 0) {
+          const gameWon = newBHp <= 0
+          const prev = loadStreak()
+          const next = gameWon
+            ? { current: prev.current + 1, best: Math.max(prev.best, prev.current + 1) }
+            : { current: 0, best: prev.best }
+          saveStreak(next)
+          setCurrentStreak(next.current)
+          setBestStreak(next.best)
           setPhase('gameover')
         } else {
           setPlayerChoice(null)
@@ -827,20 +962,20 @@ export function RpsPage() {
           <motion.div
             key="vfx-lose"
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.55, 0] }}
-            transition={{ duration: 0.45 }}
+            animate={{ opacity: [0, 0.85, 0.45, 0] }}
+            transition={{ duration: 0.65, times: [0, 0.12, 0.4, 1] }}
             className="fixed inset-0 pointer-events-none z-40"
-            style={{ background: 'radial-gradient(ellipse at 15% 50%, rgba(239,68,68,0.55) 0%, transparent 55%)' }}
+            style={{ background: 'radial-gradient(ellipse at 15% 50%, rgba(239,68,68,0.8) 0%, transparent 55%)' }}
           />
         )}
         {roundResult === 'win' && (
           <motion.div
             key="vfx-win"
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.45, 0] }}
-            transition={{ duration: 0.45 }}
+            animate={{ opacity: [0, 0.65, 0.3, 0] }}
+            transition={{ duration: 0.65, times: [0, 0.12, 0.4, 1] }}
             className="fixed inset-0 pointer-events-none z-40"
-            style={{ background: 'radial-gradient(ellipse at 85% 50%, rgba(239,68,68,0.45) 0%, transparent 55%)' }}
+            style={{ background: 'radial-gradient(ellipse at 85% 50%, rgba(52,211,153,0.65) 0%, transparent 55%)' }}
           />
         )}
       </AnimatePresence>
@@ -866,6 +1001,9 @@ export function RpsPage() {
             playerChoice={playerChoice} botChoice={botChoice}
             roundResult={roundResult}   isRevealing={isRevealing}
             playerShake={playerShake}   botShake={botShake}
+            playerFlash={playerFlash}   botFlash={botFlash}
+            showPlayerDmg={showPlayerDmg} showBotDmg={showBotDmg}
+            currentStreak={currentStreak}
             onChoice={handleChoice}
           />
         )}
@@ -874,6 +1012,8 @@ export function RpsPage() {
             won={botHp <= 0}
             playerHero={playerHero}
             botHero={botHero}
+            currentStreak={currentStreak}
+            bestStreak={bestStreak}
             onReplay={reset}
           />
         )}

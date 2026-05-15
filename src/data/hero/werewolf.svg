@@ -1,0 +1,134 @@
+<svg width="120" height="160" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-ww"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow-ww2"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="wolf-body" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#a8a29e"/>
+      <stop offset="50%" stop-color="#57534e"/>
+      <stop offset="100%" stop-color="#1c1917"/>
+    </radialGradient>
+    <radialGradient id="wolf-head" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#d6d3d1"/>
+      <stop offset="60%" stop-color="#78716c"/>
+      <stop offset="100%" stop-color="#292524"/>
+    </radialGradient>
+    <radialGradient id="moon-ww" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="100%" stop-color="#fde047"/>
+    </radialGradient>
+  </defs>
+  <g>
+    <animateTransform attributeName="transform" attributeType="XML" type="translate"
+      values="0,0;0,-5;0,0" dur="2s" repeatCount="indefinite"
+      calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+
+    <!-- Moon -->
+    <circle cx="90" cy="18" r="14" fill="url(#moon-ww)" opacity="0.3" filter="url(#glow-ww2)">
+      <animate attributeName="opacity" values="0.3;0.5;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="90" cy="18" r="10" fill="#fef9c3" opacity="0.55">
+      <animate attributeName="opacity" values="0.55;0.75;0.55" dur="3s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Shadow -->
+    <ellipse cx="60" cy="157" rx="26" ry="5" fill="#000" opacity="0.42">
+      <animate attributeName="rx" values="26;20;26" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Tail -->
+    <path d="M60,138 Q74,150 84,148 Q94,146 98,136 Q96,146 100,140"
+      stroke="#57534e" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M98,136 Q104,126 100,120"
+      stroke="#44403c" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <!-- Tail tip -->
+    <ellipse cx="100" cy="118" rx="5" ry="7" fill="#a8a29e" transform="rotate(-20,100,118)"/>
+
+    <!-- Legs (digitigrade) -->
+    <path d="M44,120 Q38,136 36,152" stroke="#57534e" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M76,120 Q82,136 84,152" stroke="#57534e" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <!-- Paws -->
+    <ellipse cx="35" cy="154" rx="11" ry="5" fill="#292524" transform="rotate(-10,35,154)"/>
+    <ellipse cx="85" cy="154" rx="11" ry="5" fill="#292524" transform="rotate(10,85,154)"/>
+    <!-- Paw claws -->
+    <path d="M27,152 Q23,157 25,159 M31,154 Q29,159 31,161 M37,155 Q37,160 39,159" stroke="#44403c" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M93,152 Q97,157 95,159 M89,154 Q91,159 89,161 M83,155 Q83,160 81,159" stroke="#44403c" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+    <!-- Body -->
+    <ellipse cx="60" cy="105" rx="28" ry="30" fill="url(#wolf-body)"/>
+    <!-- Chest lighter fur patch -->
+    <ellipse cx="60" cy="108" rx="14" ry="20" fill="#d6d3d1" opacity="0.28"/>
+    <!-- Fur lines -->
+    <path d="M42,92 Q50,88 58,94" stroke="#44403c" stroke-width="1.5" fill="none" opacity="0.5"/>
+    <path d="M62,90 Q70,86 78,92" stroke="#44403c" stroke-width="1.5" fill="none" opacity="0.5"/>
+    <path d="M40,106 Q52,102 60,107 Q68,102 80,106" stroke="#44403c" stroke-width="1" fill="none" opacity="0.4"/>
+
+    <!-- Left arm (clawed, menacing) -->
+    <path d="M36,92 Q20,102 14,112" stroke="#57534e" stroke-width="13" stroke-linecap="round" fill="none"/>
+    <circle cx="13" cy="114" r="8" fill="#57534e"/>
+    <path d="M5,110 Q0,104 4,100 M8,108 Q4,102 8,98 M12,107 Q10,100 14,98 M16,109 Q16,102 20,100" stroke="#1c1917" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Right arm (raised toward moon — howl pose) -->
+    <path d="M84,90 Q100,76 106,62" stroke="#57534e" stroke-width="13" stroke-linecap="round" fill="none"/>
+    <circle cx="107" cy="60" r="8" fill="#57534e"/>
+    <!-- Claws reaching up -->
+    <path d="M103,53 Q100,46 104,43 M107,52 Q106,45 110,43 M111,54 Q112,47 115,46 M114,58 Q116,51 119,51" stroke="#1c1917" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Neck -->
+    <rect x="50" y="68" width="20" height="18" rx="5" fill="#57534e"/>
+
+    <!-- Head (wolf) -->
+    <ellipse cx="60" cy="58" rx="22" ry="20" fill="url(#wolf-head)"/>
+    <!-- Wolf ears -->
+    <path d="M42,44 Q38,22 48,18 Q50,34 52,44 Z" fill="#57534e"/>
+    <path d="M42,44 Q40,26 47,22 Q49,36 51,44 Z" fill="#a8a29e" opacity="0.45"/>
+    <path d="M78,44 Q82,22 72,18 Q70,34 68,44 Z" fill="#57534e"/>
+    <path d="M78,44 Q80,26 73,22 Q71,36 69,44 Z" fill="#a8a29e" opacity="0.45"/>
+
+    <!-- Snout -->
+    <ellipse cx="60" cy="68" rx="14" ry="10" fill="#78716c"/>
+    <!-- Nose -->
+    <ellipse cx="60" cy="62" rx="5" ry="3.5" fill="#1c1917"/>
+    <ellipse cx="57.5" cy="63" rx="1.5" ry="1" fill="#000"/>
+    <ellipse cx="62.5" cy="63" rx="1.5" ry="1" fill="#000"/>
+
+    <!-- Eyes — glowing amber/yellow -->
+    <ellipse cx="49" cy="54" rx="7" ry="7" fill="#0a0a0f"/>
+    <ellipse cx="71" cy="54" rx="7" ry="7" fill="#0a0a0f"/>
+    <ellipse cx="49" cy="54" rx="5" ry="5.5" fill="#eab308" filter="url(#glow-ww)">
+      <animate attributeName="ry" values="5.5;7.5;5.5" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="71" cy="54" rx="5" ry="5.5" fill="#eab308" filter="url(#glow-ww)">
+      <animate attributeName="ry" values="5.5;7.5;5.5" dur="2s" repeatCount="indefinite" begin="0.25s"/>
+    </ellipse>
+    <ellipse cx="49" cy="54" rx="2" ry="4" fill="#000"/>
+    <ellipse cx="71" cy="54" rx="2" ry="4" fill="#000"/>
+
+    <!-- Snarling mouth -->
+    <path d="M46,68 Q60,78 74,68" stroke="#1c1917" stroke-width="2" fill="none"/>
+    <!-- Fangs -->
+    <path d="M50,69 L48,77 M56,71 L55,79 M64,71 L65,79 M70,69 L72,77" stroke="#e7e5e4" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+    <!-- Fur detail lines on head -->
+    <line x1="50" y1="58" x2="46" y2="52" stroke="#44403c" stroke-width="1" opacity="0.4"/>
+    <line x1="54" y1="56" x2="51" y2="50" stroke="#44403c" stroke-width="1" opacity="0.35"/>
+    <line x1="66" y1="56" x2="69" y2="50" stroke="#44403c" stroke-width="1" opacity="0.4"/>
+    <line x1="70" y1="58" x2="74" y2="52" stroke="#44403c" stroke-width="1" opacity="0.35"/>
+
+    <!-- Howl sound particles near moon -->
+    <circle cx="96" cy="32" r="2.5" fill="#fef9c3" opacity="0" filter="url(#glow-ww)">
+      <animate attributeName="opacity" values="0;0.65;0" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="32;22;32" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="2.5;4;2.5" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="86" cy="26" r="1.5" fill="#fef9c3" opacity="0">
+      <animate attributeName="opacity" values="0;0.5;0" dur="1.8s" begin="0.9s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="26;16;26" dur="1.8s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Moonlight ground shimmer -->
+    <ellipse cx="60" cy="157" rx="24" ry="4" fill="#eab308" opacity="0.08" filter="url(#glow-ww)">
+      <animate attributeName="opacity" values="0.08;0.18;0.08" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+</svg>
