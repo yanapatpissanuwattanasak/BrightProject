@@ -15,6 +15,8 @@ import { TimeBlockingPage } from '@/pages/TimeBlockingPage'
 import { TarotPage } from '@/pages/TarotPage'
 import ThailandPage from '@/pages/ThailandPage'
 import ChatPage from '@/pages/ChatPage'
+import BangkokAQIPage from '@/pages/BangkokAQIPage'
+import PokedexPage from '@/pages/PokedexPage'
 
 // Admin pages — lazy-loaded, separate chunk
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
@@ -48,6 +50,12 @@ export default function App() {
 
         {/* Tarot — standalone (no nav layout) */}
         <Route path="/tarot" element={<TarotPage />} />
+
+        {/* Bangkok AQI — standalone (no nav layout) */}
+        <Route path={ROUTES.BANGKOK_AQI} element={<BangkokAQIPage />} />
+
+        {/* Pokédex — standalone (no nav layout) */}
+        <Route path={ROUTES.POKEDEX} element={<PokedexPage />} />
 
         {/* Admin login (no layout) */}
         <Route

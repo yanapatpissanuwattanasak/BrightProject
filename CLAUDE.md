@@ -36,3 +36,21 @@ Never refactor existing code unless the user explicitly asks for it. This includ
 
 Before making any file change, present the proposed change to the user and wait for explicit approval. Do not proceed with edits, creates, or deletes until the user confirms. This applies to every individual action — a prior approval does not authorize subsequent steps.
 
+## 🗺️ Feature Changes — Read This First
+
+Always consult `PROJECT_INDEX.md` before modifying or adding any feature.
+It is the index for understanding file relationships and impact scope.
+No edits should begin without it.
+
+## Codebase Keyword
+
+When the user types the word **"codebase"**, you must:
+
+- Read and analyze code **only from files within the project folder**
+- Do **not** search the web, documentation, or any external source
+- Do **not** make assumptions beyond what exists in the actual files
+- If a file or reference cannot be found in the folder, respond with:
+  "⚠️ Not found in codebase — please check the file path"
+
+Treat the project folder as the **single source of truth**.
+

@@ -2,6 +2,11 @@ import type { ProjectFilters } from '@/types/project.types'
 import type { AttractionFilter } from '@/types/thailand.types'
 
 export const queryKeys = {
+  pokemon: {
+    listInfinite: (limit: number) => ['pokemon', 'list', limit] as const,
+    detail: (nameOrId: string | number) => ['pokemon', 'detail', String(nameOrId)] as const,
+    byType: (type: string) => ['pokemon', 'type', type] as const,
+  },
   attractions: {
     byProvince: (provinceId: string, filter: AttractionFilter) =>
       ['attractions', provinceId, filter] as const,

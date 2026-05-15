@@ -8,6 +8,8 @@ export const ROUTES = {
   TAROT: '/tarot',
   THAILAND: '/thailand',
   CHAT: '/chat',
+  BANGKOK_AQI: '/bangkok-aqi',
+  POKEDEX: '/pokedex',
   ADMIN: {
     LOGIN: '/admin/login',
     DASHBOARD: '/admin',

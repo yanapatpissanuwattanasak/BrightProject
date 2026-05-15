@@ -4,7 +4,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { cn } from '@/lib/utils'
 
 const RESUME_URL = '/resume.pdf'
-const GITHUB_URL = 'https://github.com/ynpbright'
+const GITHUB_URL = 'https://github.com/yanapatpissanuwattanasak'
 
 const navItems = [
   { label: 'Projects', to: ROUTES.PROJECTS },

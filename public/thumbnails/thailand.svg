@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#0A1628"/>
+    </linearGradient>
+    <linearGradient id="mapFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0F4B3B"/>
+      <stop offset="100%" stop-color="#065F46"/>
+    </linearGradient>
+    <radialGradient id="provinceGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bangkokGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Map clip -->
+    <clipPath id="mapClip">
+      <rect x="0" y="0" width="360" height="450"/>
+    </clipPath>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg)"/>
+
+  <!-- Vertical divider -->
+  <line x1="360" y1="20" x2="360" y2="430" stroke="#1E3A5F" stroke-width="1" opacity="0.6"/>
+
+  <!-- ── Left panel: Thailand map ── -->
+  <g clip-path="url(#mapClip)">
+    <!-- Subtle map grid -->
+    <line x1="60"  y1="0"   x2="60"  y2="450" stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+    <line x1="140" y1="0"   x2="140" y2="450" stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+    <line x1="220" y1="0"   x2="220" y2="450" stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+    <line x1="300" y1="0"   x2="300" y2="450" stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+    <line x1="0"   y1="90"  x2="360" y2="90"  stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+    <line x1="0"   y1="180" x2="360" y2="180" stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+    <line x1="0"   y1="270" x2="360" y2="270" stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+    <line x1="0"   y1="360" x2="360" y2="360" stroke="#1E293B" stroke-width="0.5" opacity="0.5"/>
+
+    <!-- Thailand silhouette (simplified outline, clockwise from NW) -->
+    <path d="M 125,22
+             L 210,20
+             L 272,28
+             L 318,98
+             L 318,158
+             L 298,198
+             L 268,232
+             L 248,262
+             L 236,318
+             L 218,378
+             L 208,428
+             L 183,428
+             L 168,378
+             L 153,318
+             L 133,262
+             L 118,232
+             L 103,198
+             L 93,152
+             L 88,98
+             L 98,52
+             Z"
+          fill="url(#mapFill)" fill-opacity="0.85"
+          stroke="#10B981" stroke-width="1.2" stroke-opacity="0.5"/>
+
+    <!-- Chiang Mai dot (approx lat~18.8°N → y≈68, lon~99°E → x≈138) -->
+    <ellipse cx="145" cy="70" rx="22" ry="22" fill="url(#provinceGlow)"/>
+    <circle  cx="145" cy="70" r="6"  fill="#10B981" opacity="0.9"/>
+    <circle  cx="145" cy="70" r="3"  fill="#fff"     opacity="0.95"/>
+
+    <!-- Bangkok dot (approx lat~13.8°N → y≈272, lon~100.5°E → x≈195) -->
+    <ellipse cx="195" cy="268" rx="16" ry="16" fill="url(#bangkokGlow)"/>
+    <circle  cx="195" cy="268" r="5"  fill="#F59E0B" opacity="0.9"/>
+    <circle  cx="195" cy="268" r="2"  fill="#fff"     opacity="0.95"/>
+
+    <!-- Province labels -->
+    <text x="165" y="65"  font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#34D399" opacity="0.9">Chiang Mai</text>
+    <text x="208" y="265" font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#FCD34D" opacity="0.9">Bangkok</text>
+
+    <!-- Map title -->
+    <text x="25"  y="36"  font-family="'Inter',system-ui,sans-serif" font-size="9" fill="#475569" letter-spacing="1.5">THAILAND</text>
+    <text x="25"  y="50"  font-family="'Inter',system-ui,sans-serif" font-size="8" fill="#334155">77 provinces</text>
+
+    <!-- Province count badge -->
+    <rect x="22" y="406" width="88" height="20" rx="10" fill="#0F4B3B" opacity="0.7"/>
+    <text x="66" y="420" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#34D399">TAT API live</text>
+  </g>
+
+  <!-- ── Right panel: Province info ── -->
+  <!-- Province name -->
+  <text x="388" y="55" font-family="'Inter',system-ui,sans-serif" font-size="10" fill="#64748B" letter-spacing="2">SELECTED PROVINCE</text>
+  <text x="388" y="92" font-family="'Inter',system-ui,sans-serif" font-size="26" font-weight="700" fill="#F0FDF4">Chiang Mai</text>
+  <text x="388" y="114" font-family="'Inter',system-ui,sans-serif" font-size="11" fill="#6EE7B7">Northern Thailand</text>
+
+  <line x1="388" y1="130" x2="770" y2="130" stroke="#1E3A5F" stroke-width="1" opacity="0.8"/>
+
+  <!-- Category pills -->
+  <text x="388" y="152" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#64748B" letter-spacing="1.5">CATEGORIES</text>
+
+  <!-- Nature -->
+  <rect x="388" y="162" width="66" height="22" rx="11" fill="#052e16" stroke="#16A34A" stroke-width="1"/>
+  <text x="421" y="177" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#4ADE80">Nature</text>
+
+  <!-- Temple -->
+  <rect x="462" y="162" width="64" height="22" rx="11" fill="#1c1917" stroke="#D97706" stroke-width="1"/>
+  <text x="494" y="177" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#FCD34D">Temple</text>
+
+  <!-- Culture -->
+  <rect x="534" y="162" width="66" height="22" rx="11" fill="#1e1b4b" stroke="#818CF8" stroke-width="1"/>
+  <text x="567" y="177" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#A5B4FC">Culture</text>
+
+  <!-- Shopping -->
+  <rect x="608" y="162" width="74" height="22" rx="11" fill="#0c4a6e" stroke="#38BDF8" stroke-width="1"/>
+  <text x="645" y="177" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#7DD3FC">Shopping</text>
+
+  <line x1="388" y1="198" x2="770" y2="198" stroke="#1E3A5F" stroke-width="1" opacity="0.6"/>
+  <text x="388" y="218" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#64748B" letter-spacing="1.5">TOP ATTRACTIONS</text>
+
+  <!-- Attraction 1 -->
+  <rect x="388" y="228" width="382" height="52" rx="8" fill="#0A1628" opacity="0.7"/>
+  <rect x="396" y="236" width="4" height="36" rx="2" fill="#16A34A"/>
+  <text x="410" y="251" font-family="'Inter',system-ui,sans-serif" font-size="10" font-weight="600" fill="#F0FDF4">Doi Inthanon National Park</text>
+  <text x="410" y="268" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#64748B">Nature · Highest peak in Thailand</text>
+  <text x="752" y="251" text-anchor="end" font-family="'Inter',system-ui,sans-serif" font-size="9" fill="#FCD34D">★ 4.8</text>
+
+  <!-- Attraction 2 -->
+  <rect x="388" y="288" width="382" height="52" rx="8" fill="#0A1628" opacity="0.7"/>
+  <rect x="396" y="296" width="4" height="36" rx="2" fill="#D97706"/>
+  <text x="410" y="311" font-family="'Inter',system-ui,sans-serif" font-size="10" font-weight="600" fill="#F0FDF4">Wat Phra That Doi Suthep</text>
+  <text x="410" y="328" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#64748B">Temple · Sacred mountain temple</text>
+  <text x="752" y="311" text-anchor="end" font-family="'Inter',system-ui,sans-serif" font-size="9" fill="#FCD34D">★ 4.9</text>
+
+  <!-- Attraction 3 -->
+  <rect x="388" y="348" width="382" height="52" rx="8" fill="#0A1628" opacity="0.7"/>
+  <rect x="396" y="356" width="4" height="36" rx="2" fill="#7C3AED"/>
+  <text x="410" y="371" font-family="'Inter',system-ui,sans-serif" font-size="10" font-weight="600" fill="#F0FDF4">Chiang Mai Night Bazaar</text>
+  <text x="410" y="388" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#64748B">Culture · Local market &amp; street food</text>
+  <text x="752" y="371" text-anchor="end" font-family="'Inter',system-ui,sans-serif" font-size="9" fill="#FCD34D">★ 4.5</text>
+
+  <!-- Footer -->
+  <text x="580" y="432" text-anchor="middle" font-family="'Inter',system-ui,sans-serif" font-size="8.5" fill="#334155" letter-spacing="0.5">React · TanStack Query · react-simple-maps · TAT API</text>
+</svg>

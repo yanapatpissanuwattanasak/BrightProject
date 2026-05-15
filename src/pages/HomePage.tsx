@@ -4,16 +4,13 @@ import { FeaturedProjectCard } from '@/components/home/FeaturedProjectCard'
 import { ProjectsGrid } from '@/components/home/ProjectsGrid'
 import { SkillsSection } from '@/components/home/SkillsSection'
 import { WelcomeOverlay } from '@/components/home/WelcomeOverlay'
-import { ThailandCard } from '@/components/home/ThailandCard'
 import { AnonymousChat } from '@/components/home/AnonymousChat'
-import { useFeaturedProjects } from '@/hooks/useFeaturedProjects'
 import { usePublishedProjects } from '@/hooks/usePublishedProjects'
 
 export default function HomePage() {
-  const { data: featured } = useFeaturedProjects()
   const { data: projects, isLoading } = usePublishedProjects()
 
-  const featuredProject = featured?.[0]
+  const featuredProject = projects?.find((p) => p.isFeatured)
   const otherProjects = projects?.filter((p) => !p.isFeatured).slice(0, 6)
 
   return (
@@ -35,7 +32,7 @@ export default function HomePage() {
         </section>
       )}
 
-      <ProjectsGrid projects={otherProjects} isLoading={isLoading} appendCards={<ThailandCard />} />
+      <ProjectsGrid projects={otherProjects} isLoading={isLoading} />
 
       <SkillsSection />
       <AnonymousChat />

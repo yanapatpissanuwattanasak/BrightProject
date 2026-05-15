@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { projectDetailPath } from '@/constants/routes'
 import { Badge } from '@/components/ui/Badge'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -14,8 +15,20 @@ function isInternalUrl(url: string) {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const glowColor = project.tags[0]?.color ?? '#6366f1'
+
   return (
-    <article className="group rounded-card bg-surface-raised border border-surface-border overflow-hidden hover:border-primary/40 transition-colors">
+    <motion.article
+      className="group rounded-card bg-surface-raised border border-surface-border overflow-hidden cursor-pointer"
+      style={{ boxShadow: `0px 4px 12px rgba(0,0,0,0), 0px 0px 0px 0px ${glowColor}00` }}
+      whileHover={{
+        y: -14,
+        scale: 1.04,
+        boxShadow: `0px 24px 48px rgba(0,0,0,0.18), 0px 0px 0px 2px ${glowColor}99`,
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+    >
       {project.thumbnailUrl ? (
         <img
           src={project.thumbnailUrl}
@@ -86,7 +99,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           )}
         </div>
       </div>
-    </article>
+    </motion.article>
   )
 }
 

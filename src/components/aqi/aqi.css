@@ -1,0 +1,151 @@
+/* ── Background crossfade ───────────────────────────────────────── */
+.aqi-hero {
+  transition: background 1.2s ease-in-out;
+}
+
+/* ── Clouds (good) ──────────────────────────────────────────────── */
+@keyframes cloudDrift {
+  0%   { transform: translateX(-220px); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translateX(110vw); opacity: 0; }
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+.cloud-1 {
+  width: 140px; height: 40px;
+  top: 18%; left: -160px;
+  animation: cloudDrift 28s linear infinite;
+}
+.cloud-1::before { width: 70px; height: 70px; top: -30px; left: 20px; }
+.cloud-1::after  { width: 50px; height: 50px; top: -20px; left: 65px; }
+
+.cloud-2 {
+  width: 100px; height: 30px;
+  top: 38%; left: -120px;
+  animation: cloudDrift 38s 8s linear infinite;
+  opacity: 0.7;
+}
+.cloud-2::before { width: 55px; height: 55px; top: -24px; left: 12px; }
+.cloud-2::after  { width: 38px; height: 38px; top: -16px; left: 52px; }
+
+.cloud-3 {
+  width: 160px; height: 44px;
+  top: 60%; left: -180px;
+  animation: cloudDrift 32s 18s linear infinite;
+  opacity: 0.6;
+}
+.cloud-3::before { width: 80px; height: 80px; top: -36px; left: 22px; }
+.cloud-3::after  { width: 58px; height: 58px; top: -24px; left: 76px; }
+
+/* ── Sun glow (good) ────────────────────────────────────────────── */
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1);   opacity: 0.35; }
+  50%       { transform: scale(1.1); opacity: 0.55; }
+}
+.sun-glow {
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(255,240,100,0.6) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: sunPulse 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Shimmer haze (moderate) ────────────────────────────────────── */
+@keyframes shimmer {
+  0%, 100% { opacity: 0.18; }
+  50%       { opacity: 0.42; }
+}
+.haze-layer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(255,220,100,0.28) 100%);
+  animation: shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Smoke bands (unhealthy) ────────────────────────────────────── */
+@keyframes smokeDrift {
+  0%   { transform: translateX(-30%) scaleY(1);   opacity: 0; }
+  15%  { opacity: 0.35; }
+  85%  { opacity: 0.35; }
+  100% { transform: translateX(110%) scaleY(1.3); opacity: 0; }
+}
+.smoke-band {
+  position: absolute;
+  left: 0;
+  width: 160%;
+  border-radius: 999px;
+  pointer-events: none;
+  background: rgba(150, 80, 30, 0.22);
+  filter: blur(18px);
+}
+.smoke-band-1 { height: 60px; top: 22%; animation: smokeDrift 14s 0s   ease-in-out infinite; }
+.smoke-band-2 { height: 80px; top: 46%; animation: smokeDrift 18s 5s   ease-in-out infinite; }
+.smoke-band-3 { height: 50px; top: 68%; animation: smokeDrift 22s 10s  ease-in-out infinite; }
+
+/* ── Pulse glow (very-unhealthy) ────────────────────────────────── */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.2; transform: scale(1);    }
+  50%       { opacity: 0.5; transform: scale(1.15); }
+}
+.pulse-orb {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 60vmin;
+  height: 60vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(167,139,250,0.5) 0%, transparent 70%);
+  animation: pulseGlow 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Storm flicker (hazardous) ──────────────────────────────────── */
+@keyframes stormFlicker {
+  0%, 89%, 91%, 93%, 95%, 100% { opacity: 1; }
+  90%  { opacity: 0.65; }
+  92%  { opacity: 0.85; }
+  94%  { opacity: 0.55; }
+}
+.aqi-hazardous {
+  animation: stormFlicker 4s ease-in-out infinite;
+}
+.storm-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(100,0,0,0.55) 100%);
+  pointer-events: none;
+}
+
+/* ── Skeleton loading pulse ─────────────────────────────────────── */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 0.55; }
+}
+.aqi-skeleton {
+  animation: skeletonPulse 1.6s ease-in-out infinite;
+}
+
+/* ── Count-up number ────────────────────────────────────────────── */
+@keyframes numberAppear {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.aqi-number-appear {
+  animation: numberAppear 0.5s ease-out forwards;
+}
