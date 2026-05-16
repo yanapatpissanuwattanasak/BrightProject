@@ -1008,7 +1008,7 @@ function MpWaitingScreen({ roomCode, onCancel }: { roomCode: string; onCancel: (
   const [copied, setCopied] = useState(false)
 
   function copyLink() {
-    const url = `${window.location.origin}/socket.io?room=${roomCode}`
+    const url = `${window.location.origin}/rps?room=${roomCode}`
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
