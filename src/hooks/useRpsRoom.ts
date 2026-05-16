@@ -79,6 +79,8 @@ export function useRpsRoom() {
     if (!RPS_WS_URL) return
 
     const socket = createRpsSocket()
+    console.log("socket", socket);
+    
     if (!socket) return
     socketRef.current = socket
 
