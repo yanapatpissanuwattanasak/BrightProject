@@ -6,7 +6,7 @@ export function createRpsSocket(): Socket | null {
   if (!RPS_WS_URL) return null
   return io(`${RPS_WS_URL}/rps`, {
     transports: ['websocket'],
-    autoConnect: true,
+    autoConnect: false,
     reconnectionAttempts: 3,
     timeout: 3000,
   })
