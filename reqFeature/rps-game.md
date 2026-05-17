@@ -150,7 +150,7 @@ function resolveRound(player: Choice, bot: Choice): RoundResult {
 
 **`src/constants/routes.ts`** — เพิ่ม:
 ```ts
-RPS: '/rps',
+RPS: '/rps-game',
 ```
 
 **`src/App.tsx`** — เพิ่ม route ใต้ TAROT (standalone ไม่ครอบด้วย RootLayout):

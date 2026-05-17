@@ -142,7 +142,7 @@ export const STATIC_PROJECTS: Project[] = [
       { label: 'Spell types', value: '3' },
     ],
     loomUrl: undefined,
-    demoUrl: '/rps',
+    demoUrl: '/rps-game',
     githubUrl: undefined,
     thumbnailUrl: '/thumbnails/rps.svg',
     sortOrder: 8,
