@@ -1091,7 +1091,6 @@ export function RpsPage() {
   const botShake    = useAnimation()
   const playerFlash = useAnimation()
   const botFlash    = useAnimation()
-  const mpGameoverDone = useRef(false)
   const [showPlayerDmg, setShowPlayerDmg] = useState(false)
   const [showBotDmg, setShowBotDmg]       = useState(false)
   const [currentStreak, setCurrentStreak] = useState(() => loadStreak().current)
@@ -1137,18 +1136,7 @@ export function RpsPage() {
       setBotHp(newBHp)
       setTimeout(() => {
         if (newPHp <= 0 || newBHp <= 0) {
-          if (!mpGameoverDone.current) {
-            mpGameoverDone.current = true
-            const gameWon = newBHp <= 0
-            const prev = loadStreak()
-            const next = gameWon
-              ? { current: prev.current + 1, best: Math.max(prev.best, prev.current + 1) }
-              : { current: 0, best: prev.best }
-            saveStreak(next)
-            setCurrentStreak(next.current)
-            setBestStreak(next.best)
-            setPhase('gameover')
-          }
+          // gameover handled by the room.roomPhase effect below
         } else {
           setPlayerChoice(null)
           setBotChoice(null)
@@ -1165,17 +1153,14 @@ export function RpsPage() {
   // ── Multiplayer: gameover ─────────────────────────────────────
   useEffect(() => {
     if (mode !== 'multiplayer' || room.roomPhase !== 'gameover') return
-    if (!mpGameoverDone.current) {
-      mpGameoverDone.current = true
-      const gameWon = room.winner === 'player'
-      const prev = loadStreak()
-      const next = gameWon
-        ? { current: prev.current + 1, best: Math.max(prev.best, prev.current + 1) }
-        : { current: 0, best: prev.best }
-      saveStreak(next)
-      setCurrentStreak(next.current)
-      setBestStreak(next.best)
-    }
+    const gameWon = room.winner === 'player'
+    const prev = loadStreak()
+    const next = gameWon
+      ? { current: prev.current + 1, best: Math.max(prev.best, prev.current + 1) }
+      : { current: 0, best: prev.best }
+    saveStreak(next)
+    setCurrentStreak(next.current)
+    setBestStreak(next.best)
     setPhase('gameover')
   }, [mode, room.roomPhase, room.winner]) // eslint-disable-line react-hooks/exhaustive-deps
 
