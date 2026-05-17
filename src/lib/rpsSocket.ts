@@ -4,11 +4,15 @@ export const RPS_WS_URL = import.meta.env.VITE_RPS_WS_URL as string | undefined
 
 export function createRpsSocket(): Socket | null {
   if (!RPS_WS_URL) return null
-  return io(`${RPS_WS_URL}/socket.io`, {
-    // path: '/rps',
+  const a = io(`${RPS_WS_URL}/socket.io`, {
+    path: '/rps',
     transports: ['websocket'],
     autoConnect: false,
     reconnectionAttempts: 3,
     timeout: 3000,
   })
+  console.log(RPS_WS_URL);
+  console.log("connect rps", a);
+  
+  return a
 }
